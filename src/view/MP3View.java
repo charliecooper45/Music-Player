@@ -3,7 +3,9 @@ package view;
 import java.awt.BorderLayout;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseListener;
+import java.io.File;
 
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 
 import controller.MP3Controller;
@@ -17,7 +19,9 @@ import controller.MP3Controller;
 public class MP3View extends JFrame {
 	private MP3Controller controller;
 	private TopPanel topPanel;
+	private MiddlePanel middlePanel;
 	private BottomPanel bottomPanel;
+	private JFileChooser fileChooser;
 	
 	public MP3View() {
 		super("MP3 Player");
@@ -30,25 +34,43 @@ public class MP3View extends JFrame {
 		topPanel = new TopPanel();
 		add(topPanel, BorderLayout.NORTH);
 		
-		bottomPanel = new BottomPanel();
-		bottomPanel.setTableValueListener(new TableValueListener() {
+		middlePanel = new MiddlePanel();
+		middlePanel.setTableValueListener(new TableValueListener() {
 			@Override
 			public Object getTableValue(int rowIndex) {
 				return controller.getTrack(rowIndex);
 			}
 		});
-		add(bottomPanel, BorderLayout.CENTER);
+		add(middlePanel, BorderLayout.CENTER);
+		
+		bottomPanel = new BottomPanel();
+		add(bottomPanel, BorderLayout.SOUTH);
 	}
 	
 	public void addActionListener(ActionListener listener) {
 		topPanel.addActionListener(listener);
+		bottomPanel.addActionListener(listener);
 	}
 	
 	public void addMouseListener(MouseListener listener) {
-		bottomPanel.addMouseListener(listener);
+		middlePanel.addMouseListener(listener);
 	}
 	
 	public void setController(MP3Controller controller) {
 		this.controller = controller;
+	}
+	
+	public File[] showJFileChooser() {
+		fileChooser = new JFileChooser();
+		fileChooser.setDialogTitle("Select music to add");
+		fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+		fileChooser.setMultiSelectionEnabled(true);
+		
+		int returnVal = fileChooser.showOpenDialog(this);
+		
+		if(returnVal == JFileChooser.APPROVE_OPTION) {
+			return fileChooser.getSelectedFiles();
+		}
+		return null;
 	}
 }

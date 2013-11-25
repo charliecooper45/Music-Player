@@ -21,6 +21,13 @@ public class TrackBean {
 		this.location = location;
 	}
 	
+	public TrackBean(Path location, String artist, String title, String album) {
+		this.location = location;
+		this.artist = artist;
+		this.title = title;
+		this.album = album;
+	}
+
 	/**
 	 * @return the title
 	 */

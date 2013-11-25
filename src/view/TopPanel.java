@@ -63,7 +63,7 @@ public class TopPanel extends JPanel {
 		JPanel modeButtonsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		// TODO NEXT: Add these buttons with there relevant icons
 		for (int i = 0; i < controlButtons.length; i++) {
-			controlButtons[i] = new JButton("A");
+			controlButtons[i] = new JButton();
 			if (i < 5) {
 				buttonsPanel.add(controlButtons[i]);
 			} else {
@@ -75,9 +75,12 @@ public class TopPanel extends JPanel {
 				break;
 			case 1:
 				controlButtons[i].setName("play");
+				controlButtons[i].setIcon(Utils.createIcon("/view/resources/images/playicon.png"));
 				break;
 			case 2:
 				controlButtons[i].setName("pause");
+				controlButtons[i].setIcon(Utils.createIcon("/view/resources/images/pauseicon.png"));
+				break;
 			}
 		}
 		Utils.setGBC(gc, 1, 4, 1, 1, GridBagConstraints.BOTH);
