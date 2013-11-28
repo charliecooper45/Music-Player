@@ -73,4 +73,6 @@ public class MP3View extends JFrame {
 		}
 		return null;
 	}
+	
+	public void updateTables()
 }

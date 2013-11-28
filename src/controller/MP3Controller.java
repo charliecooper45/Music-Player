@@ -5,6 +5,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
+import java.util.Observable;
+import java.util.Observer;
 
 import javax.swing.JButton;
 import javax.swing.JTable;
@@ -13,7 +15,7 @@ import model.MP3Model;
 import model.TrackBean;
 import view.MP3View;
 
-public class MP3Controller extends MouseAdapter implements ActionListener{
+public class MP3Controller extends MouseAdapter implements ActionListener, Observer{
 	private MP3View view;
 	private MP3Model model;
 
@@ -23,6 +25,7 @@ public class MP3Controller extends MouseAdapter implements ActionListener{
 		this.view.addActionListener(this);
 		this.view.addMouseListener(this);
 		this.model = model;
+		this.model.addObserver(this);
 	}
 	
 	public TrackBean getTrack(int trackNo) {
@@ -68,4 +71,10 @@ public class MP3Controller extends MouseAdapter implements ActionListener{
 		}
 	}
 
+	@Override
+	public void update(Observable o, Object arg) {
+		if(o instanceof MP3Model) {
+			System.out.println("Update the table");
+		}
+	}
 }

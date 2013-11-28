@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Observable;
 
 import com.mpatric.mp3agic.ID3v1;
 import com.mpatric.mp3agic.InvalidDataException;
@@ -14,7 +15,7 @@ import com.mpatric.mp3agic.UnsupportedTagException;
 
 import javafx.scene.media.MediaPlayer;
 
-public class MP3Model {
+public class MP3Model extends Observable{
 	// Holds the track database
 	private List<TrackBean> tracks;
 	//TODO NEXT: Implement the observer model, the controller should observe the model and watch out for table update orders
@@ -54,6 +55,8 @@ public class MP3Model {
 				createTrack(file);
 			}
 		}
+		setChanged();
+		notifyObservers();
 	}
 	
 	private void createTrack(File file) {
