@@ -3,21 +3,25 @@ package model;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Observable;
+
+import javafx.scene.media.MediaPlayer;
 
 import com.mpatric.mp3agic.ID3v1;
 import com.mpatric.mp3agic.InvalidDataException;
 import com.mpatric.mp3agic.Mp3File;
 import com.mpatric.mp3agic.UnsupportedTagException;
 
-import javafx.scene.media.MediaPlayer;
-
 public class MP3Model extends Observable{
 	// Holds the track database
 	private List<TrackBean> tracks;
+	// Holds the artist database
+	private List<ArtistBean> artists;
 	//TODO NEXT: Implement the observer model, the controller should observe the model and watch out for table update orders
 	private MediaPlayer player;
 	private State state;
@@ -28,6 +32,7 @@ public class MP3Model extends Observable{
 	public MP3Model() {
 		tracks = new ArrayList<>();
 		populateTracks();
+		artists = new ArrayList<>();
 		
 		initialState = new InitialState(this);
 		playingState = new PlayingState(this);
@@ -49,8 +54,9 @@ public class MP3Model extends Observable{
 	public void processFiles(File... files) {
 		for(File file : files) {
 			if(file.isDirectory()) {
+				File[] filesInDirectory = file.listFiles();
 				//TODO NEXT: Check this recursion
-				processFiles(file);
+				processFiles(filesInDirectory);
 			} else {
 				createTrack(file);
 			}
@@ -89,15 +95,52 @@ public class MP3Model extends Observable{
 	        	return;
 	        }
 	        
-	        TrackBean bean = new TrackBean(Paths.get(file.toURI()), artist, title, album);
-	        tracks.add(bean);
+	        addTrackToDatabase(Paths.get(file.toURI()), artist, title, album);
+
 		} catch (UnsupportedTagException | InvalidDataException | IOException e) {
 			e.printStackTrace();
 		}
 	}
 	
+	private void addTrackToDatabase(Path path, String artist, String title, String album) {
+		TrackBean trackBean = new TrackBean(path, artist, title, album);
+		tracks.add(trackBean);
+		
+		ArtistBean trackArtist = null;
+		
+		// Check if the artist is already listed in the database
+		for(ArtistBean bean : artists) {
+			if(bean.getName().equals(artist)) {
+    			trackArtist = bean;
+    			break;
+			}
+		}
+		
+		// If the artist was not found, create a new artist
+		if(trackArtist == null) {
+        	trackArtist = new ArtistBean(artist);
+        	artists.add(trackArtist);
+		}
+        
+        trackArtist.addTrack(trackBean);
+	}
+	
 	public TrackBean getTrack(int trackNo) {
 		return tracks.get(trackNo);
+	}
+	
+	public int getNumberOfTracks() {
+		return tracks.size();
+	}
+	
+	public List<String> getArtists() {
+		List<String> artistStrings = new ArrayList<>();
+		
+		for(ArtistBean artist : artists) {
+			artistStrings.add(artist.getName());
+		}
+		
+		return Collections.unmodifiableList(artistStrings);
 	}
 
 	//TODO NEXT B: Document

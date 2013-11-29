@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseListener;
 import java.io.File;
+import java.util.List;
 
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -40,6 +41,11 @@ public class MP3View extends JFrame {
 			public Object getTableValue(int rowIndex) {
 				return controller.getTrack(rowIndex);
 			}
+
+			@Override
+			public int getNumberOfTracks() {
+				return controller.getNumberOfTracks();
+			}
 		});
 		add(middlePanel, BorderLayout.CENTER);
 		
@@ -74,5 +80,7 @@ public class MP3View extends JFrame {
 		return null;
 	}
 	
-	public void updateTables()
+	public void updateView(List<String> artists) {
+		middlePanel.updatePanel(artists);
+	}
 }

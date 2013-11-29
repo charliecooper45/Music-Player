@@ -5,6 +5,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
+import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -31,6 +32,11 @@ public class MP3Controller extends MouseAdapter implements ActionListener, Obser
 	public TrackBean getTrack(int trackNo) {
 		return model.getTrack(trackNo);
 	}
+	
+	public int getNumberOfTracks() {
+		return model.getNumberOfTracks();
+	}
+	
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
@@ -74,7 +80,7 @@ public class MP3Controller extends MouseAdapter implements ActionListener, Obser
 	@Override
 	public void update(Observable o, Object arg) {
 		if(o instanceof MP3Model) {
-			System.out.println("Update the table");
+			view.updateView(model.getArtists());
 		}
 	}
 }
