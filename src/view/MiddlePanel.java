@@ -2,7 +2,9 @@ package view;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.event.MouseListener;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.DefaultListModel;
@@ -12,8 +14,11 @@ import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
 
+import model.AlbumBean;
+import model.ArtistBean;
 import model.TrackBean;
 
 /**
@@ -24,15 +29,17 @@ import model.TrackBean;
 @SuppressWarnings("serial")
 public class MiddlePanel extends JPanel{
 	
-	private JList<String> artistsList;
-	private DefaultListModel<String> artistsListModel;
-	private JList<String> albumsList;
-	private DefaultListModel<String> albumsListModel;
+	private JList<ArtistBean> artistsList;
+	private DefaultListModel<ArtistBean> artistsListModel;
+	private JList<AlbumBean> albumsList;
+	private DefaultListModel<AlbumBean> albumsListModel;
 	private JTable tracksTable;
 	private TracksTableModel tableModel;
-	private TableValueListener tableValueListener;
-
+	// Holds the current songs to display in the table at the bottom of the panel
+	private List<TrackBean> tableTracks; 
+	
 	public MiddlePanel() {
+		tableTracks = new ArrayList<>();
 		setBackground(Color.BLUE);
 		setLayout(new BorderLayout());
 		init();
@@ -49,18 +56,17 @@ public class MiddlePanel extends JPanel{
 	
 	private void setupListsPanel() {
 		// TODO NEXT B: Set this up with labels for "Artist" and "Album" to make it clearer to the user.
-		String[] test = {"Brand New", "Other", "more", "etc", "blah"};
-		
 		artistsListModel = new DefaultListModel<>();
-		artistsListModel.add(0, "test");
 		artistsList = new JList<>(artistsListModel);
 		artistsList.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
 		
-		albumsList = new JList<>(test);
+		albumsListModel = new DefaultListModel<>();
+		albumsList = new JList<>(albumsListModel);
 		albumsList.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
 		
 		JSplitPane pane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, artistsList, albumsList);
 		pane.setResizeWeight(0.5);
+		pane.setPreferredSize(new Dimension(0, 200));
 		add(pane, BorderLayout.NORTH);
 	}
 	
@@ -74,23 +80,41 @@ public class MiddlePanel extends JPanel{
 	}
 	
 	/**
-	 * @param tableValueListener the tableValueListener to set
+	 * @param listListener the listListener to set
 	 */
-	public void setTableValueListener(TableValueListener tableValueListener) {
-		this.tableValueListener = tableValueListener;
+	public void addListListener(ListSelectionListener listener) {
+		artistsList.addListSelectionListener(listener);
+		albumsList.addListSelectionListener(listener);
 	}
-	
-	public void updatePanel(List<String> artists) {
+
+	public void updateArtists(List<ArtistBean> artists) {
 		tableModel.fireTableDataChanged();
 		
 		// Update the artists list
 		artistsListModel.removeAllElements();
-		for(String artist : artists) {
+		for(ArtistBean artist : artists) {
 			artistsListModel.addElement(artist);
 		}
-		
 	}
 	
+	public void changeDisplayedArtist(ArtistBean artist) {
+		albumsListModel.clear();
+		
+		for(AlbumBean album : artist.getAlbums()) {
+			albumsListModel.addElement(album);
+		}
+		
+		albumsList.setSelectedIndex(0);
+	}
+	
+	/**
+	 * @param tableTracks the tableTracks to set
+	 */
+	public void setTableTracks(List<TrackBean> tableTracks) {
+		this.tableTracks = tableTracks;
+		tableModel.fireTableDataChanged();
+	}
+
 	private class TracksTableModel extends AbstractTableModel {
 		private String[] colNames = {"Artist", "Title", "Length"};
 		
@@ -101,7 +125,7 @@ public class MiddlePanel extends JPanel{
 
 		@Override
 		public int getRowCount() {
-			return tableValueListener.getNumberOfTracks();
+			return tableTracks.size();
 		}
 
 		@Override
@@ -111,7 +135,8 @@ public class MiddlePanel extends JPanel{
 
 		@Override
 		public Object getValueAt(int rowIndex, int columnIndex) {
-			TrackBean track = (TrackBean) tableValueListener.getTableValue(rowIndex);
+			TrackBean track = tableTracks.get(rowIndex);
+			
 			switch(columnIndex) {
 			case 0:
 				return track.getArtist();

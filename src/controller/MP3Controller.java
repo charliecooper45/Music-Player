@@ -5,18 +5,22 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
-import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
 import javax.swing.JButton;
+import javax.swing.JList;
 import javax.swing.JTable;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
+import model.AlbumBean;
+import model.ArtistBean;
 import model.MP3Model;
 import model.TrackBean;
 import view.MP3View;
 
-public class MP3Controller extends MouseAdapter implements ActionListener, Observer{
+public class MP3Controller extends MouseAdapter implements ActionListener, Observer, ListSelectionListener{
 	private MP3View view;
 	private MP3Model model;
 
@@ -25,6 +29,7 @@ public class MP3Controller extends MouseAdapter implements ActionListener, Obser
 		this.view.setController(this);
 		this.view.addActionListener(this);
 		this.view.addMouseListener(this);
+		this.view.addListListener(this);
 		this.model = model;
 		this.model.addObserver(this);
 	}
@@ -36,8 +41,9 @@ public class MP3Controller extends MouseAdapter implements ActionListener, Obser
 	public int getNumberOfTracks() {
 		return model.getNumberOfTracks();
 	}
-	
 
+	// Methods for the listeners
+	
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		Object source = e.getSource();
@@ -78,9 +84,34 @@ public class MP3Controller extends MouseAdapter implements ActionListener, Obser
 	}
 
 	@Override
+	public void valueChanged(ListSelectionEvent e) {
+		
+		if(!e.getValueIsAdjusting()) {
+			@SuppressWarnings("unchecked")
+			JList<Object> list = (JList<Object>) e.getSource();
+			
+			// Get the selected object in the list
+			Object selected = list.getSelectedValue();
+			
+			// Check the type of the selected object
+			if(selected instanceof ArtistBean) {
+				ArtistBean artist = (ArtistBean) selected;
+				
+				// Update the album list to reflect the change of artist
+				view.changeDisplayedArtist(artist);
+			} else if(selected != null){
+				AlbumBean album = (AlbumBean) selected;
+				
+				// Change the tracks show in the table
+				view.setTableTracks(album.getTracks());
+			}
+		}
+	}
+	
+	@Override
 	public void update(Observable o, Object arg) {
 		if(o instanceof MP3Model) {
-			view.updateView(model.getArtists());
+			view.updateArtists(model.getArtists());
 		}
 	}
 }

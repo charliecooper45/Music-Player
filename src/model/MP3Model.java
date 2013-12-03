@@ -31,23 +31,12 @@ public class MP3Model extends Observable{
 
 	public MP3Model() {
 		tracks = new ArrayList<>();
-		populateTracks();
 		artists = new ArrayList<>();
 		
 		initialState = new InitialState(this);
 		playingState = new PlayingState(this);
 		pausedState = new PausedState(this);
 		state = initialState;
-	}
-	
-	private void populateTracks() {
-		TrackBean track = new TrackBean(Paths.get("./one.mp3"));
-		track.setArtist("30 Seconds to Mars");
-		track.setTitle("One");
-		track.setMinutes(2);
-		track.setSeconds(30);
-		tracks.add(track);
-		//TODONEXT: Sort out the implementation of this, need to pass the bean as an argument to the play method when selected in the table
 	}
 	
 	//TODO NEXT B: Document
@@ -133,11 +122,11 @@ public class MP3Model extends Observable{
 		return tracks.size();
 	}
 	
-	public List<String> getArtists() {
-		List<String> artistStrings = new ArrayList<>();
+	public List<ArtistBean> getArtists() {
+		List<ArtistBean> artistStrings = new ArrayList<>();
 		
 		for(ArtistBean artist : artists) {
-			artistStrings.add(artist.getName());
+			artistStrings.add(artist);
 		}
 		
 		return Collections.unmodifiableList(artistStrings);

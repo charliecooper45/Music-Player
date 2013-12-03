@@ -1,6 +1,7 @@
 package model;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -9,6 +10,8 @@ import java.util.List;
  *
  */
 public class ArtistBean {
+	// TODO NEXT B: In the Artists/Albums list create an All option
+	
 	private String name;
 	// The albums the artist has
 	private List<AlbumBean> albums;
@@ -29,17 +32,17 @@ public class ArtistBean {
 		for(AlbumBean bean : albums) {
 			if(bean.getTitle().equals(track.getAlbum())) {
 				album = bean;
-				System.out.println("Album exists");
 				break;
 			}
 		}
 
 		if(album == null) {
 			// Create a new album
-			album = new AlbumBean();
+			album = new AlbumBean(track.getAlbum());
+			albums.add(album);
 		}
 	
-		// album.addTrack(track);
+		album.addTrack(track);
 	}
 
 	/**
@@ -54,5 +57,17 @@ public class ArtistBean {
 	 */
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	/**
+	 * @return the albums
+	 */
+	public List<AlbumBean> getAlbums() {
+		return Collections.unmodifiableList(albums);
+	}
+
+	@Override
+	public String toString() {
+		return name;
 	}
 }

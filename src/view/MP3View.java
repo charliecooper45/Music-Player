@@ -8,7 +8,11 @@ import java.util.List;
 
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.filechooser.FileFilter;
 
+import model.ArtistBean;
+import model.TrackBean;
 import controller.MP3Controller;
 
 /**
@@ -36,17 +40,6 @@ public class MP3View extends JFrame {
 		add(topPanel, BorderLayout.NORTH);
 		
 		middlePanel = new MiddlePanel();
-		middlePanel.setTableValueListener(new TableValueListener() {
-			@Override
-			public Object getTableValue(int rowIndex) {
-				return controller.getTrack(rowIndex);
-			}
-
-			@Override
-			public int getNumberOfTracks() {
-				return controller.getNumberOfTracks();
-			}
-		});
 		add(middlePanel, BorderLayout.CENTER);
 		
 		bottomPanel = new BottomPanel();
@@ -62,12 +55,36 @@ public class MP3View extends JFrame {
 		middlePanel.addMouseListener(listener);
 	}
 	
+	public void addListListener(ListSelectionListener listener) {
+		middlePanel.addListListener(listener);
+	}
+	
+	/**
+	 * @param tableTracks the tableTracks to set
+	 */
+	public void setTableTracks(List<TrackBean> tableTracks) {
+		middlePanel.setTableTracks(tableTracks);
+	}
+
 	public void setController(MP3Controller controller) {
 		this.controller = controller;
 	}
 	
 	public File[] showJFileChooser() {
 		fileChooser = new JFileChooser();
+		fileChooser.addChoosableFileFilter(new FileFilter() {
+
+	        @Override
+	        public boolean accept(File f) {
+	            return f.getName().endsWith(".mp3");
+	        }
+
+	        @Override
+	        public String getDescription() {
+	            return "MP3 files";
+	        }
+
+	    });
 		fileChooser.setDialogTitle("Select music to add");
 		fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
 		fileChooser.setMultiSelectionEnabled(true);
@@ -80,7 +97,11 @@ public class MP3View extends JFrame {
 		return null;
 	}
 	
-	public void updateView(List<String> artists) {
-		middlePanel.updatePanel(artists);
+	public void updateArtists(List<ArtistBean> artists) {
+		middlePanel.updateArtists(artists);
+	}
+
+	public void changeDisplayedArtist(ArtistBean artist) {
+		middlePanel.changeDisplayedArtist(artist);
 	}
 }
