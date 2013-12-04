@@ -8,8 +8,11 @@ import java.io.File;
 import java.util.Observable;
 import java.util.Observer;
 
+import javafx.util.Duration;
+
 import javax.swing.JButton;
 import javax.swing.JList;
+import javax.swing.JProgressBar;
 import javax.swing.JTable;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -20,7 +23,7 @@ import model.MP3Model;
 import model.TrackBean;
 import view.MP3View;
 
-public class MP3Controller extends MouseAdapter implements ActionListener, Observer, ListSelectionListener{
+public class MP3Controller extends MouseAdapter implements ActionListener, Observer, ListSelectionListener {
 	private MP3View view;
 	private MP3Model model;
 
@@ -32,30 +35,35 @@ public class MP3Controller extends MouseAdapter implements ActionListener, Obser
 		this.view.addListListener(this);
 		this.model = model;
 		this.model.addObserver(this);
+		
 	}
-	
+
 	public TrackBean getTrack(int trackNo) {
 		return model.getTrack(trackNo);
 	}
-	
+
 	public int getNumberOfTracks() {
 		return model.getNumberOfTracks();
 	}
 
-	// Methods for the listeners
+	public Duration getCurrentTrackTime() {
+		return model.getCurrentTrackTime();
+	}
 	
+	// Methods for the listeners
+
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		Object source = e.getSource();
 
 		if (source instanceof JButton) {
 			// Handle events for the buttons
-			JButton button = (JButton)e.getSource();
+			JButton button = (JButton) e.getSource();
 			String buttonName = button.getName();
-			
-			switch(buttonName) {
+
+			switch (buttonName) {
 			case "play":
-				if(model.getState() == model.getPausedState()) {
+				if (model.getState() == model.getPausedState()) {
 					model.resumeSong();
 				}
 				break;
@@ -64,8 +72,7 @@ public class MP3Controller extends MouseAdapter implements ActionListener, Obser
 				break;
 			case "addmusic":
 				File[] files = view.showJFileChooser();
-				if(files != null)
-					model.processFiles(files);
+				if (files != null) model.processFiles(files);
 				break;
 			}
 		}
@@ -73,44 +80,59 @@ public class MP3Controller extends MouseAdapter implements ActionListener, Obser
 
 	@Override
 	public void mouseClicked(MouseEvent e) {
-		JTable table = (JTable)e.getSource();
-		int selectedRow = table.getSelectedRow();
-		TrackBean selectedTrack = getTrack(selectedRow);
+		Object source = e.getSource();
 		
-		if(e.getClickCount() == 2) {
-			model.stopSong();
-			model.playSong(selectedTrack);
+		if (source instanceof JTable) {
+			JTable table = (JTable) source;
+			int selectedRow = table.getSelectedRow();
+			TrackBean selectedTrack = getTrack(selectedRow);
+
+			if (e.getClickCount() == 2) {
+				model.stopSong();
+				model.playSong(selectedTrack);
+				view.updatePlayingTrack(selectedTrack);
+			}
+		} else if(source instanceof JProgressBar) {
+			//TODO NEXT B: Implement this, the track should move to the location specified
+			JProgressBar progressBar = (JProgressBar) source;
+			
+			int mouseX = e.getX();
+			
+			int progressBarVal = (int)Math.round(((double)mouseX / (double)progressBar.getWidth()) * progressBar.getMaximum());
+			
+			System.out.println("Value: " + progressBarVal);
+
 		}
 	}
 
 	@Override
 	public void valueChanged(ListSelectionEvent e) {
-		
-		if(!e.getValueIsAdjusting()) {
+
+		if (!e.getValueIsAdjusting()) {
 			@SuppressWarnings("unchecked")
 			JList<Object> list = (JList<Object>) e.getSource();
-			
+
 			// Get the selected object in the list
 			Object selected = list.getSelectedValue();
-			
+
 			// Check the type of the selected object
-			if(selected instanceof ArtistBean) {
+			if (selected instanceof ArtistBean) {
 				ArtistBean artist = (ArtistBean) selected;
-				
+
 				// Update the album list to reflect the change of artist
 				view.changeDisplayedArtist(artist);
-			} else if(selected != null){
+			} else if (selected != null) {
 				AlbumBean album = (AlbumBean) selected;
-				
+
 				// Change the tracks show in the table
 				view.setTableTracks(album.getTracks());
 			}
 		}
 	}
-	
+
 	@Override
 	public void update(Observable o, Object arg) {
-		if(o instanceof MP3Model) {
+		if (o instanceof MP3Model) {
 			view.updateArtists(model.getArtists());
 		}
 	}

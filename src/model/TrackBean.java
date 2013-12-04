@@ -2,6 +2,8 @@ package model;
 
 import java.nio.file.Path;
 
+import javafx.util.Duration;
+
 /**
  * Represents a single track.
  * @author Charlie
@@ -12,8 +14,7 @@ public class TrackBean {
 	private String artist;
 	private String title;
 	private String album;
-	private int minutes;
-	private int seconds;
+	private Duration length;
 	
 	public TrackBean() {}
 	
@@ -21,11 +22,12 @@ public class TrackBean {
 		this.location = location;
 	}
 	
-	public TrackBean(Path location, String artist, String title, String album) {
+	public TrackBean(Path location, String artist, String title, String album, Duration length) {
 		this.location = location;
 		this.artist = artist;
 		this.title = title;
 		this.album = album;
+		this.length = length;
 	}
 
 	/**
@@ -88,27 +90,27 @@ public class TrackBean {
 	 * @return the minutes
 	 */
 	public int getMinutes() {
-		return minutes;
+		return (int) length.toMinutes();
 	}
-
-	/**
-	 * @param minutes the minutes to set
-	 */
-	public void setMinutes(int minutes) {
-		this.minutes = minutes;
-	}
-
+	
 	/**
 	 * @return the seconds
 	 */
 	public int getSeconds() {
-		return seconds;
+		return (int) (length.toSeconds() - (60 * getMinutes()));
+	}
+	
+	/**
+	 * @return the length
+	 */
+	public Duration getLength() {
+		return length;
 	}
 
 	/**
-	 * @param seconds the seconds to set
+	 * @param length the length to set
 	 */
-	public void setSeconds(int seconds) {
-		this.seconds = seconds;
+	public void setLength(Duration length) {
+		this.length = length;
 	}
 }

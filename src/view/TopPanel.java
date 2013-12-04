@@ -6,12 +6,19 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseListener;
+import java.util.List;
+
+import javafx.util.Duration;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JSlider;
+import javax.swing.SwingWorker;
+
+import model.TrackBean;
 
 /**
  * A JPanel which displays information about the track and buttons to manipulate the playing state. 
@@ -26,6 +33,9 @@ public class TopPanel extends JPanel {
 	private JSlider volumeControl;
 	private JProgressBar trackProgress;
 	private JButton[] controlButtons;
+	private TrackBean currentTrack;
+	
+	private TopPanelListener topPanelListener;
 
 	public TopPanel() {
 		setLayout(new GridBagLayout());
@@ -101,4 +111,60 @@ public class TopPanel extends JPanel {
 			controlButtons[i].addActionListener(listener);
 		}
 	}
+
+	public void updatePlayingTrack(TrackBean track) {
+		currentTrack = track;
+		trackInfo.setText(currentTrack.getArtist() + " - " + currentTrack.getTitle());
+		updateGui.execute();
+	}
+	
+	/**
+	 * Adds an ActionListener from the view to the appropriate components
+	 * @param listener
+	 */
+	public void addMouseListener(MouseListener listener) {
+		// Add listener to the table
+		trackProgress.addMouseListener(listener);
+	}
+	
+	/**
+	 * @param topPanelListener the topPanelListener to set
+	 */
+	public void setTopPanelListener(TopPanelListener topPanelListener) {
+		this.topPanelListener = topPanelListener;
+	}
+
+	// SwingWorker - loops and updates the gui components on the TopPanel
+	private SwingWorker<Void, Duration> updateGui = new SwingWorker<Void, Duration>() {
+		
+		@Override
+		protected void process(List<Duration> chunks) {
+			Duration trackDuration = chunks.get(chunks.size() - 1);
+			int minutes = (int) trackDuration.toMinutes();
+			int seconds = (int) (trackDuration.toSeconds() - (60 * minutes)) + 1;
+			
+			if(seconds < 10) {
+				time.setText(minutes + ":0" + seconds);
+			} else {
+				time.setText(minutes + ":" + seconds);
+			}
+			
+			// Update the progress bar
+			//TODO NEXT B: Update this so the progress bar is smooth
+			trackProgress.setValue((int) trackDuration.toSeconds() + 1);
+		}
+
+		@Override
+		protected Void doInBackground() throws Exception {
+			trackProgress.setMaximum((int) currentTrack.getLength().toSeconds());
+			
+			while(true) {
+				Duration d = topPanelListener.getCurrentTrackTime();
+				System.out.println("Current track time: " + d);
+				publish(d);
+				Thread.sleep(1000);
+			}
+		}
+		
+	};
 }

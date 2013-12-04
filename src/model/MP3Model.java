@@ -10,7 +10,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Observable;
 
+import javafx.beans.property.ReadOnlyProperty;
 import javafx.scene.media.MediaPlayer;
+import javafx.util.Duration;
 
 import com.mpatric.mp3agic.ID3v1;
 import com.mpatric.mp3agic.InvalidDataException;
@@ -58,7 +60,6 @@ public class MP3Model extends Observable{
 		Mp3File mp3File;
 		String track, artist, title, album, year;
 		int genre;
-		
 		try {
 			mp3File = new Mp3File(file.getAbsolutePath());
 			
@@ -84,15 +85,15 @@ public class MP3Model extends Observable{
 	        	return;
 	        }
 	        
-	        addTrackToDatabase(Paths.get(file.toURI()), artist, title, album);
+	        addTrackToDatabase(Paths.get(file.toURI()), artist, title, album, mp3File.getLengthInMilliseconds());
 
 		} catch (UnsupportedTagException | InvalidDataException | IOException e) {
 			e.printStackTrace();
 		}
 	}
 	
-	private void addTrackToDatabase(Path path, String artist, String title, String album) {
-		TrackBean trackBean = new TrackBean(path, artist, title, album);
+	private void addTrackToDatabase(Path path, String artist, String title, String album, long milliseconds) {
+		TrackBean trackBean = new TrackBean(path, artist, title, album, new Duration(milliseconds));
 		tracks.add(trackBean);
 		
 		ArtistBean trackArtist = null;
@@ -132,22 +133,25 @@ public class MP3Model extends Observable{
 		return Collections.unmodifiableList(artistStrings);
 	}
 
+	public Duration getCurrentTrackTime() {
+		ReadOnlyProperty<Duration> d = player.currentTimeProperty();
+		return d.getValue();
+	}
+	
 	//TODO NEXT B: Document
 	public void playSong(TrackBean track) {
 		state.playSong(track);
+		System.out.println("Track Length: " + player.getTotalDuration());
 	}
 
-	//TODO NEXT B: Document
 	public void pauseSong() {
 		state.pauseSong();
 	}
 	
-	//TODO NEXT B: Document
 	public void resumeSong() {
 		state.resumeSong();
 	}
 	
-	//TODO NEXT B: Document
 	public void stopSong() {
 		if(player != null) 
 			player.stop();

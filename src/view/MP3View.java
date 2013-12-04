@@ -6,6 +6,8 @@ import java.awt.event.MouseListener;
 import java.io.File;
 import java.util.List;
 
+import javafx.util.Duration;
+
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.event.ListSelectionListener;
@@ -37,6 +39,12 @@ public class MP3View extends JFrame {
 	
 	private void init() {
 		topPanel = new TopPanel();
+		topPanel.setTopPanelListener(new TopPanelListener() {
+			@Override
+			public Duration getCurrentTrackTime() {
+				return controller.getCurrentTrackTime();
+			}
+		});
 		add(topPanel, BorderLayout.NORTH);
 		
 		middlePanel = new MiddlePanel();
@@ -53,6 +61,7 @@ public class MP3View extends JFrame {
 	
 	public void addMouseListener(MouseListener listener) {
 		middlePanel.addMouseListener(listener);
+		topPanel.addMouseListener(listener);
 	}
 	
 	public void addListListener(ListSelectionListener listener) {
@@ -68,6 +77,10 @@ public class MP3View extends JFrame {
 
 	public void setController(MP3Controller controller) {
 		this.controller = controller;
+	}
+	
+	public void updatePlayingTrack(TrackBean track) {
+		topPanel.updatePlayingTrack(track);
 	}
 	
 	public File[] showJFileChooser() {
