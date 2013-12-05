@@ -2,7 +2,11 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="lib" path="C:/Users/Charlie/Downloads/mp3agic-master/mp3agic-master/target/mp3agic-0.8.3-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="C:/Program Files/Java/jre7/lib/jfxrt.jar"/>
+	<classpathentry kind="lib" path="C:/Program Files/Java/jre7/lib/jfxrt.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/C:/Users/Charlie/Downloads/javafx-2_2_45-apidocs.zip!/api"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -123,7 +123,7 @@ public class TopPanel extends JPanel {
 	 * @param listener
 	 */
 	public void addMouseListener(MouseListener listener) {
-		// Add listener to the table
+		// Add listener to the progress bar
 		trackProgress.addMouseListener(listener);
 	}
 	
@@ -141,7 +141,7 @@ public class TopPanel extends JPanel {
 		protected void process(List<Duration> chunks) {
 			Duration trackDuration = chunks.get(chunks.size() - 1);
 			int minutes = (int) trackDuration.toMinutes();
-			int seconds = (int) (trackDuration.toSeconds() - (60 * minutes)) + 1;
+			int seconds = (int) (trackDuration.toSeconds() - (60 * minutes));
 			
 			if(seconds < 10) {
 				time.setText(minutes + ":0" + seconds);
@@ -158,12 +158,12 @@ public class TopPanel extends JPanel {
 		protected Void doInBackground() throws Exception {
 			trackProgress.setMaximum((int) currentTrack.getLength().toSeconds());
 			
-			while(true) {
+			while(trackProgress.getValue() < trackProgress.getMaximum()) {
 				Duration d = topPanelListener.getCurrentTrackTime();
-				System.out.println("Current track time: " + d);
 				publish(d);
-				Thread.sleep(1000);
+				Thread.sleep(500);
 			}
+			return null;
 		}
 		
 	};

@@ -24,7 +24,6 @@ public class MP3Model extends Observable{
 	private List<TrackBean> tracks;
 	// Holds the artist database
 	private List<ArtistBean> artists;
-	//TODO NEXT: Implement the observer model, the controller should observe the model and watch out for table update orders
 	private MediaPlayer player;
 	private State state;
 	private State initialState;
@@ -136,6 +135,17 @@ public class MP3Model extends Observable{
 	public Duration getCurrentTrackTime() {
 		ReadOnlyProperty<Duration> d = player.currentTimeProperty();
 		return d.getValue();
+	}
+	
+	public void setTrackPercentagePlayed(int percentage) {
+		if(player != null) {
+			System.out.println("Seeking! + percentage: " + percentage);
+			Duration totalDuration = player.getTotalDuration();
+			Duration time = (totalDuration.divide(100).multiply(percentage));
+			System.out.println("Total duration: " + totalDuration);
+			System.out.println("Skip to: " + time);
+			player.seek(time);
+		}
 	}
 	
 	//TODO NEXT B: Document

@@ -71,6 +71,7 @@ public class MP3Controller extends MouseAdapter implements ActionListener, Obser
 				model.pauseSong();
 				break;
 			case "addmusic":
+				// TODO NEXT: Implement the JProgressBar for adding tracks (This should happen in a seperate thread)
 				File[] files = view.showJFileChooser();
 				if (files != null) model.processFiles(files);
 				break;
@@ -93,15 +94,16 @@ public class MP3Controller extends MouseAdapter implements ActionListener, Obser
 				view.updatePlayingTrack(selectedTrack);
 			}
 		} else if(source instanceof JProgressBar) {
-			//TODO NEXT B: Implement this, the track should move to the location specified
 			JProgressBar progressBar = (JProgressBar) source;
 			
 			int mouseX = e.getX();
 			
+			// Calculate the percentage to set the track to
 			int progressBarVal = (int)Math.round(((double)mouseX / (double)progressBar.getWidth()) * progressBar.getMaximum());
+			double value = (100.0/progressBar.getMaximum()); 
+			int percentage = (int) (progressBarVal * value);
 			
-			System.out.println("Value: " + progressBarVal);
-
+			model.setTrackPercentagePlayed(percentage);
 		}
 	}
 
