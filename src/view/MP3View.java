@@ -29,6 +29,7 @@ public class MP3View extends JFrame {
 	private MiddlePanel middlePanel;
 	private BottomPanel bottomPanel;
 	private JFileChooser fileChooser;
+	private ProgressDialog progressDialog; 
 	
 	public MP3View() {
 		super("MP3 Player");
@@ -108,6 +109,22 @@ public class MP3View extends JFrame {
 			return fileChooser.getSelectedFiles();
 		}
 		return null;
+	}
+	
+	public void showProgressDialog(int maximumSize, ActionListener listener) {
+		progressDialog = new ProgressDialog(this, maximumSize);
+		progressDialog.addActionListener(listener);
+		progressDialog.setProgressDialogListener(new ProgressDialogListener() {
+			@Override
+			public int getNumberProcessed() {
+				return controller.getNumberProcessed();
+			}
+		});
+		progressDialog.setVisible(true);
+	}
+	
+	public void disposeProgressDialog() {
+		progressDialog.disposeDialog();
 	}
 	
 	public void updateArtists(List<ArtistBean> artists) {
