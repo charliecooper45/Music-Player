@@ -16,8 +16,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import sun.nio.cs.ext.ISCII91;
-
 import javafx.beans.property.ReadOnlyProperty;
 import javafx.scene.media.MediaPlayer;
 import javafx.util.Duration;
@@ -27,13 +25,13 @@ import com.mpatric.mp3agic.InvalidDataException;
 import com.mpatric.mp3agic.Mp3File;
 import com.mpatric.mp3agic.UnsupportedTagException;
 
-//TODO NEXT: Issue with wrong song being played when double clicked
 public class MP3Model extends Observable {
-	// Holds the track database
-	private volatile List<TrackBean> tracks;
+	// Holds the current tracks
+	private volatile List<TrackBean> currentTracks;
 	// Holds the artist database
 	private volatile List<ArtistBean> artists;
 	private MediaPlayer player;
+	private double volume = 0.5;
 	private State state;
 	private State initialState;
 	private State playingState;
@@ -48,7 +46,7 @@ public class MP3Model extends Observable {
 
 	public MP3Model() {
 		executor = Executors.newSingleThreadExecutor();
-		tracks = new ArrayList<>();
+		currentTracks = new ArrayList<>();
 		artists = new ArrayList<>();
 
 		initialState = new InitialState(this);
@@ -97,7 +95,6 @@ public class MP3Model extends Observable {
 		return false;
 	}
 
-	//TODO NEXT B: Document
 	public void startProcessThread(final File... files) {
 		future = executor.submit(new ProcessFilesThread(files));
 	}
@@ -107,11 +104,7 @@ public class MP3Model extends Observable {
 	}
 
 	public TrackBean getTrack(int trackNo) {
-		return tracks.get(trackNo);
-	}
-
-	public int getNumberOfTracks() {
-		return tracks.size();
+		return currentTracks.get(trackNo);
 	}
 
 	public List<ArtistBean> getArtists() {
@@ -147,10 +140,13 @@ public class MP3Model extends Observable {
 		return numberProcessed;
 	}
 
+	public void setCurrentTracks(List<TrackBean> currentTracks) {
+		this.currentTracks = currentTracks;
+	}
+	
 	//TODO NEXT B: Document
 	public void playSong(TrackBean track) {
 		state.playSong(track);
-		System.out.println("Track Length: " + player.getTotalDuration());
 	}
 
 	public void pauseSong() {
@@ -161,12 +157,24 @@ public class MP3Model extends Observable {
 		state.resumeSong();
 	}
 
-	public void stopSong() {
+	public void stopSong(boolean playAnotherSong) {
 		if (player != null)
 			player.stop();
-		state = initialState;
+		
+		// Check to see if the user is ceasing to play any songs
+		if(!playAnotherSong) {
+			state = initialState;
+		}
 	}
 
+	public void setVolume(double value) {
+		volume = value;
+		
+		if(player != null) {
+			player.setVolume(volume);
+		}
+	}
+	
 	/**
 	 * @return the pausedState
 	 */
@@ -213,6 +221,7 @@ public class MP3Model extends Observable {
 	 * @param player the player to set
 	 */
 	public void setPlayer(MediaPlayer player) {
+		player.setVolume(volume);
 		this.player = player;
 	}
 
@@ -253,11 +262,15 @@ public class MP3Model extends Observable {
 
 		private void processFiles(File[] files) {
 			for (File file : files) {
-				if (file.isDirectory()) {
-					File[] filesInDirectory = file.listFiles();
-					processFiles(filesInDirectory);
+				if (!Thread.currentThread().isInterrupted()) {
+					if (file.isDirectory()) {
+						File[] filesInDirectory = file.listFiles();
+						processFiles(filesInDirectory);
+					} else {
+						createTrack(file);
+					}
 				} else {
-					createTrack(file);
+					break;
 				}
 			}
 			setChanged();
@@ -297,13 +310,13 @@ public class MP3Model extends Observable {
 
 				addTrackToDatabase(Paths.get(file.toURI()), artist, title, album, mp3File.getLengthInMilliseconds());
 			} catch (UnsupportedTagException | InvalidDataException | IOException e) {
-				// Thread interrupted and throws FNF exception
+				//TODO NEXT B: Produce error to show that the user has deleted a file while it is being processed (check for interrupt)
+				e.printStackTrace();
 			}
 		}
 
 		private void addTrackToDatabase(Path path, String artist, String title, String album, long milliseconds) {
 			TrackBean trackBean = new TrackBean(path, artist, title, album, new Duration(milliseconds));
-			tracks.add(trackBean);
 
 			ArtistBean trackArtist = null;
 

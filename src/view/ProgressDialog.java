@@ -11,7 +11,6 @@ import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JProgressBar;
 import javax.swing.SwingWorker;
-// TODO NEXT: Display the counting tracks message
 @SuppressWarnings("serial")
 public class ProgressDialog extends JDialog{
 	

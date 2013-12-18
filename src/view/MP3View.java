@@ -10,6 +10,7 @@ import javafx.util.Duration;
 
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.filechooser.FileFilter;
 
@@ -67,6 +68,10 @@ public class MP3View extends JFrame {
 	
 	public void addListListener(ListSelectionListener listener) {
 		middlePanel.addListListener(listener);
+	}
+	
+	public void addVolumeChangeListener(ChangeListener listener) {
+		topPanel.addVolumeChangeListener(listener);
 	}
 	
 	/**

@@ -13,7 +13,10 @@ import javafx.util.Duration;
 import javax.swing.JButton;
 import javax.swing.JList;
 import javax.swing.JProgressBar;
+import javax.swing.JSlider;
 import javax.swing.JTable;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
@@ -26,7 +29,7 @@ import view.MP3View;
 public class MP3Controller implements Observer {
 	private MP3View view;
 	private MP3Model model;
-	
+
 	// Listeners 
 	private ButtonListener buttonListener = new ButtonListener();
 
@@ -36,6 +39,7 @@ public class MP3Controller implements Observer {
 		this.view.addActionListener(buttonListener);
 		this.view.addMouseListener(new MouseListener());
 		this.view.addListListener(new ListListener());
+		this.view.addVolumeChangeListener(new VolumeChangeListener());
 		this.model = model;
 		this.model.addObserver(this);
 
@@ -45,18 +49,14 @@ public class MP3Controller implements Observer {
 		return model.getTrack(trackNo);
 	}
 
-	public int getNumberOfTracks() {
-		return model.getNumberOfTracks();
-	}
-
 	public Duration getCurrentTrackTime() {
 		return model.getCurrentTrackTime();
 	}
-	
+
 	public int getNumberProcessed() {
 		return model.getNumberProcessed();
 	}
-	
+
 	@Override
 	public void update(Observable o, Object arg) {
 		if (o instanceof MP3Model) {
@@ -86,7 +86,7 @@ public class MP3Controller implements Observer {
 					break;
 				case "addmusic":
 					final File[] files = view.showJFileChooser();
-					
+
 					if (files != null) {
 						int mp3Count = model.getMP3Count(files);
 						Runnable run = new Runnable() {
@@ -124,7 +124,7 @@ public class MP3Controller implements Observer {
 				TrackBean selectedTrack = getTrack(selectedRow);
 
 				if (e.getClickCount() == 2) {
-					model.stopSong();
+					model.stopSong(true);
 					model.playSong(selectedTrack);
 					view.updatePlayingTrack(selectedTrack);
 				}
@@ -165,8 +165,27 @@ public class MP3Controller implements Observer {
 
 					// Change the tracks show in the table
 					view.setTableTracks(album.getTracks());
+					// Set the current tracks held in the model
+					model.setCurrentTracks(album.getTracks());
 				}
 			}
 		}
+	}
+
+	private class VolumeChangeListener implements ChangeListener {
+		@Override
+		public void stateChanged(ChangeEvent e) {
+			Object source = e.getSource();
+			
+			if (source instanceof JSlider) {
+				JSlider slider = (JSlider) source;
+				int value = slider.getValue();
+				
+				// Convert to a double value for use with the model 
+				double doubleValue = (double) (value / 100.0);
+				model.setVolume(doubleValue);
+			}
+		}
+
 	}
 }

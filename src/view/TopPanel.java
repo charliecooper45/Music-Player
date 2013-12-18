@@ -17,6 +17,8 @@ import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JSlider;
 import javax.swing.SwingWorker;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import model.TrackBean;
 
@@ -31,10 +33,12 @@ public class TopPanel extends JPanel {
 	private JLabel time;
 	private JLabel trackInfo;
 	private JSlider volumeControl;
+	//TODO NEXT: This is not working properly
 	private JProgressBar trackProgress;
 	private JButton[] controlButtons;
 	private TrackBean currentTrack;
 	
+	//TODO NEXT: Top panel is resizing dynamically, need to prevent this
 	private TopPanelListener topPanelListener;
 
 	public TopPanel() {
@@ -57,7 +61,7 @@ public class TopPanel extends JPanel {
 		Utils.setGBC(gc, 2, 1, 1, 1, GridBagConstraints.BOTH);
 		add(trackInfo, gc);
 
-		volumeControl = new JSlider(JSlider.HORIZONTAL);
+		volumeControl = new JSlider(JSlider.HORIZONTAL, 0, 100, 50);
 		Utils.setGBC(gc, 2, 2, 1, 1, GridBagConstraints.BOTH);
 		gc.weighty = 0.8;
 		add(volumeControl, gc);
@@ -112,10 +116,22 @@ public class TopPanel extends JPanel {
 		}
 	}
 
+	/**
+	 * Adds a ChangeListener from the view to the appropriate components
+	 * @param listener
+	 */
+	public void addVolumeChangeListener(ChangeListener listener) {
+		volumeControl.addChangeListener(listener);
+	}
+	
 	public void updatePlayingTrack(TrackBean track) {
 		currentTrack = track;
+		trackProgress.setValue(0);
+		trackProgress.setMaximum((int) currentTrack.getLength().toSeconds());
 		trackInfo.setText(currentTrack.getArtist() + " - " + currentTrack.getTitle());
-		updateGui.execute();
+		
+		// Start updating the GUI
+		new UpdateGUI().execute();
 	}
 	
 	/**
@@ -135,7 +151,7 @@ public class TopPanel extends JPanel {
 	}
 
 	// SwingWorker - loops and updates the gui components on the TopPanel
-	private SwingWorker<Void, Duration> updateGui = new SwingWorker<Void, Duration>() {
+	private class UpdateGUI extends SwingWorker<Void, Duration> {
 		
 		@Override
 		protected void process(List<Duration> chunks) {
@@ -150,13 +166,12 @@ public class TopPanel extends JPanel {
 			}
 			
 			// Update the progress bar
-			//TODO NEXT B: Update this so the progress bar is smooth
 			trackProgress.setValue((int) trackDuration.toSeconds() + 1);
 		}
 
 		@Override
 		protected Void doInBackground() throws Exception {
-			trackProgress.setMaximum((int) currentTrack.getLength().toSeconds());
+			System.out.println("here");
 			
 			while(trackProgress.getValue() < trackProgress.getMaximum()) {
 				Duration d = topPanelListener.getCurrentTrackTime();
@@ -165,6 +180,5 @@ public class TopPanel extends JPanel {
 			}
 			return null;
 		}
-		
 	};
 }

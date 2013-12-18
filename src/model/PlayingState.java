@@ -1,5 +1,10 @@
 package model;
 
+import java.nio.file.Path;
+
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
+
 
 public class PlayingState implements State {
 	private MP3Model model;
@@ -9,8 +14,11 @@ public class PlayingState implements State {
 	}
 	
 	@Override
-	public void playSong(TrackBean track) {
-		System.out.println("Change the song being played here");
+	public void playSong(TrackBean bean) {
+		Path path = bean.getLocation();
+		MediaPlayer player = new MediaPlayer(new Media(path.toUri().toString()));
+		model.setPlayer(player);
+		player.play();
 	}
 
 	@Override
