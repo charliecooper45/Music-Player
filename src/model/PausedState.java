@@ -24,4 +24,9 @@ public class PausedState implements State{
 		model.setState(model.getPlayingState());
 	}
 
+	@Override
+	public void stopSong() {
+		model.getPlayer().stop();
+		model.setState(model.getInitialState());
+	}
 }

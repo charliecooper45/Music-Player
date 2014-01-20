@@ -29,7 +29,11 @@ public class PlayingState implements State {
 	
 	@Override
 	public void resumeSong() {
-		System.out.println("Cannot resume song");
+		System.err.println("Cannot resume song");
 	}
 
+	@Override
+	public void stopSong() {
+		//TODO NEXT: Impement this stopping functionality
+	}
 }

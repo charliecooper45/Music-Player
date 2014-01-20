@@ -90,7 +90,7 @@ public class MP3View extends JFrame {
 	}
 	
 	public File[] showJFileChooser() {
-		fileChooser = new JFileChooser();
+		fileChooser = new JFileChooser(new File("C:/Users/Charlie/Desktop"));
 		fileChooser.addChoosableFileFilter(new FileFilter() {
 
 	        @Override
@@ -102,7 +102,6 @@ public class MP3View extends JFrame {
 	        public String getDescription() {
 	            return "MP3 files";
 	        }
-
 	    });
 		fileChooser.setDialogTitle("Select music to add");
 		fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);

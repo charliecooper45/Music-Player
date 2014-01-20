@@ -7,7 +7,6 @@ import javafx.util.Duration;
 /**
  * Represents a single track.
  * @author Charlie
- *
  */
 public class TrackBean {
 	private Path location;

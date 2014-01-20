@@ -31,7 +31,6 @@ public class ProgressDialog extends JDialog{
 	private void init(int maximumSize) {
 		progressBar = new JProgressBar();
 		progressBar.setMaximum(maximumSize);
-		System.out.println("Maximum size: " + maximumSize);
 		add(progressBar);
 		
 		cancelButton = new JButton("Cancel");

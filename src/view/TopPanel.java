@@ -17,10 +17,11 @@ import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JSlider;
 import javax.swing.SwingWorker;
-import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import model.TrackBean;
+
+//TODO NEXT: The wrong song is being played when I click on one!
 
 /**
  * A JPanel which displays information about the track and buttons to manipulate the playing state. 
@@ -101,8 +102,6 @@ public class TopPanel extends JPanel {
 		add(buttonsPanel, gc);
 		Utils.setGBC(gc, 2, 4, 1, 1, GridBagConstraints.BOTH);
 		add(modeButtonsPanel, gc);
-		
-		
 	}
 
 	/**
@@ -171,8 +170,6 @@ public class TopPanel extends JPanel {
 
 		@Override
 		protected Void doInBackground() throws Exception {
-			System.out.println("here");
-			
 			while(trackProgress.getValue() < trackProgress.getMaximum()) {
 				Duration d = topPanelListener.getCurrentTrackTime();
 				publish(d);

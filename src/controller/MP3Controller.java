@@ -124,7 +124,7 @@ public class MP3Controller implements Observer {
 				TrackBean selectedTrack = getTrack(selectedRow);
 
 				if (e.getClickCount() == 2) {
-					model.stopSong(true);
+					model.stopSong(true, selectedTrack);
 					model.playSong(selectedTrack);
 					view.updatePlayingTrack(selectedTrack);
 				}

@@ -63,8 +63,6 @@ public class MP3Model extends Observable {
 			// Check for directory here then walk it
 			if (file.isDirectory()) {
 				// Go through the files in the directory
-				System.out.println("Directory found");
-
 				ProcessFile fileProcessor = new ProcessFile(count);
 
 				try {
@@ -157,14 +155,14 @@ public class MP3Model extends Observable {
 		state.resumeSong();
 	}
 
-	public void stopSong(boolean playAnotherSong) {
+	public void stopSong(boolean playAnotherSong, TrackBean newTrack) {
 		if (player != null)
-			player.stop();
+			state.stopSong();
 		
 		// Check to see if the user is ceasing to play any songs
 		if(!playAnotherSong) {
 			state = initialState;
-		}
+		} 
 	}
 
 	public void setVolume(double value) {
@@ -234,9 +232,8 @@ public class MP3Model extends Observable {
 
 		@Override
 		public FileVisitResult visitFile(Path aFile, BasicFileAttributes aAttrs) throws IOException {
-			System.out.println("Processing file:" + aFile);
-
 			File file = aFile.toFile();
+			
 			if (file.isDirectory()) {
 				ProcessFile subProcessFile = new ProcessFile(this.count);
 				this.count = subProcessFile.count;

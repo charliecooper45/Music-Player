@@ -11,4 +11,6 @@ public interface State {
 	public void pauseSong();
 	
 	public void resumeSong();
+	
+	public void stopSong();
 }

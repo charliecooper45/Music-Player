@@ -32,4 +32,9 @@ public class InitialState implements State {
 	public void resumeSong() {
 		// Do nothing
 	}
+
+	@Override
+	public void stopSong() {
+		// Do nothing
+	}
 }
