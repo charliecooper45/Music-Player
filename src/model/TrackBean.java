@@ -1,5 +1,7 @@
 package model;
 
+import java.io.Serializable;
+import java.net.URI;
 import java.nio.file.Path;
 
 import javafx.util.Duration;
@@ -8,25 +10,29 @@ import javafx.util.Duration;
  * Represents a single track.
  * @author Charlie
  */
-public class TrackBean {
-	private Path location;
+public class TrackBean implements Serializable {
+	private static final long serialVersionUID = 7863985297307469985L;
+	private URI location;
 	private String artist;
 	private String title;
 	private String album;
-	private Duration length;
+	@SuppressWarnings("unused")
+	private TrackDuration trackDuration;
+	private transient Duration duration;
 	
 	public TrackBean() {}
 	
-	public TrackBean(Path location) {
+	public TrackBean(URI location) {
 		this.location = location;
 	}
 	
-	public TrackBean(Path location, String artist, String title, String album, Duration length) {
+	public TrackBean(URI location, String artist, String title, String album, Duration duration) {
 		this.location = location;
 		this.artist = artist;
 		this.title = title;
 		this.album = album;
-		this.length = length;
+		this.duration = duration;
+		this.trackDuration = new TrackDuration(duration.toMillis()); 
 	}
 
 	/**
@@ -46,14 +52,14 @@ public class TrackBean {
 	/**
 	 * @return the location
 	 */
-	public Path getLocation() {
+	public URI getLocation() {
 		return location;
 	}
 
 	/**
 	 * @param location the location to set
 	 */
-	public void setLocation(Path location) {
+	public void setLocation(URI location) {
 		this.location = location;
 	}
 
@@ -89,27 +95,44 @@ public class TrackBean {
 	 * @return the minutes
 	 */
 	public int getMinutes() {
-		return (int) length.toMinutes();
+		return (int) duration.toMinutes();
 	}
 	
 	/**
 	 * @return the seconds
 	 */
 	public int getSeconds() {
-		return (int) (length.toSeconds() - (60 * getMinutes()));
+		if(duration == null) {
+			duration = new Duration(trackDuration.milliseconds);
+		}
+		return (int) (duration.toSeconds() - (60 * getMinutes()));
 	}
 	
 	/**
-	 * @return the length
+	 * @return the duration
 	 */
-	public Duration getLength() {
-		return length;
+	public Duration getDuration() {
+		return duration;
 	}
 
 	/**
-	 * @param length the length to set
+	 * @param duration the duration to set
 	 */
-	public void setLength(Duration length) {
-		this.length = length;
+	public void setDuration(Duration duration) {
+		this.duration = duration;
+	}
+	
+	/**
+	 * Class that allow the track duration to be serialized.
+	 * @author Charlie
+	 */
+	private class TrackDuration implements Serializable {
+		private static final long serialVersionUID = -7289995643505042778L;
+		@SuppressWarnings("unused")
+		private double milliseconds;
+		
+		public TrackDuration(double milliseconds) {
+			this.milliseconds = milliseconds;
+		}
 	}
 }

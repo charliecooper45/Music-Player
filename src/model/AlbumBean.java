@@ -1,10 +1,12 @@
 package model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class AlbumBean {
+public class AlbumBean implements Serializable {
+	private static final long serialVersionUID = 2703233139456179492L;
 	private String title;
 	private List<TrackBean> tracks;
 	

@@ -1,7 +1,6 @@
 package view;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.MouseListener;
 import java.util.ArrayList;
@@ -40,7 +39,6 @@ public class MiddlePanel extends JPanel{
 	
 	public MiddlePanel() {
 		tableTracks = new ArrayList<>();
-		setBackground(Color.BLUE);
 		setLayout(new BorderLayout());
 		init();
 	}
@@ -88,12 +86,20 @@ public class MiddlePanel extends JPanel{
 	}
 
 	public void updateArtists(List<ArtistBean> artists) {
+		ArtistBean selectedArtist = artistsList.getSelectedValue();
+		
 		tableModel.fireTableDataChanged();
 		
 		// Update the artists list
 		artistsListModel.removeAllElements();
 		for(ArtistBean artist : artists) {
 			artistsListModel.addElement(artist);
+		}
+		
+		if(selectedArtist != null) {
+			artistsList.setSelectedValue(selectedArtist, true);
+		} else {
+			artistsList.setSelectedIndex(0);
 		}
 	}
 	
@@ -115,6 +121,10 @@ public class MiddlePanel extends JPanel{
 		tableModel.fireTableDataChanged();
 	}
 
+	public ArtistBean getDisplayedArtist() {
+		return artistsList.getSelectedValue();
+	}
+	
 	private class TracksTableModel extends AbstractTableModel {
 		private String[] colNames = {"Artist", "Title", "Length"};
 		
@@ -143,7 +153,12 @@ public class MiddlePanel extends JPanel{
 			case 1:
 				return track.getTitle();
 			case 2:
-				return track.getMinutes() + ":" + track.getSeconds();
+				int seconds = track.getSeconds();
+				if(seconds < 10) {
+					String secondsString = "0" + seconds;
+					return track.getMinutes() + ":" + secondsString;
+				}
+				return track.getMinutes() + ":" + seconds;
 			}
 			return null;
 		}

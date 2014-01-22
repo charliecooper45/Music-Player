@@ -1,6 +1,7 @@
 package model;
 
 import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import javafx.embed.swing.JFXPanel;
 import javafx.scene.media.Media;
@@ -16,7 +17,7 @@ public class InitialState implements State {
 	@Override
 	public void playSong(TrackBean bean) {
 		new JFXPanel();
-		Path path = bean.getLocation();
+		Path path = Paths.get(bean.getLocation());
 		MediaPlayer player = new MediaPlayer(new Media(path.toUri().toString()));
 		model.setPlayer(player);
 		player.play();

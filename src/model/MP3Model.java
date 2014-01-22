@@ -2,6 +2,8 @@ package model;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -26,6 +28,9 @@ import com.mpatric.mp3agic.Mp3File;
 import com.mpatric.mp3agic.UnsupportedTagException;
 
 public class MP3Model extends Observable {
+	// Holds the location of the saved database
+	private final static Path SAVED_DATABASE_FOLDER = Paths.get(System.getProperty("user.dir") + "/MediaPlayerData");
+	private final static Path SAVED_DATABASE_FILE = Paths.get(SAVED_DATABASE_FOLDER + "/data.dt");
 	// Holds the current tracks
 	private volatile List<TrackBean> currentTracks;
 	// Holds the artist database
@@ -141,7 +146,7 @@ public class MP3Model extends Observable {
 	public void setCurrentTracks(List<TrackBean> currentTracks) {
 		this.currentTracks = currentTracks;
 	}
-	
+
 	//TODO NEXT B: Document
 	public void playSong(TrackBean track) {
 		state.playSong(track);
@@ -158,21 +163,76 @@ public class MP3Model extends Observable {
 	public void stopSong(boolean playAnotherSong, TrackBean newTrack) {
 		if (player != null)
 			state.stopSong();
-		
+
 		// Check to see if the user is ceasing to play any songs
-		if(!playAnotherSong) {
+		if (!playAnotherSong) {
 			state = initialState;
-		} 
+		}
+	}
+
+	/**
+	 * Runs all the tasks necessary before the program shutsdown
+	 */
+	public boolean closePlayer() {
+		if (player != null)
+			player.stop();
+
+		try {
+			saveDatabase();
+		} catch (IOException e) {
+			return false;
+		}
+		return true;
+	}
+
+	private void saveDatabase() throws IOException {
+		//TODO NEXT B: Check if this is Windows, if so then save in my document or another location? This could be configurable. 
+		//TODO NEXT B: Configure this in preferences API.
+		//TODO NEXT B: Only save data that is new?
+
+		if (!Files.exists(SAVED_DATABASE_FOLDER)) {
+			// There is no previously saved data so create the folder
+			Files.createDirectory(SAVED_DATABASE_FOLDER);
+		}
+
+		ObjectOutputStream os = new ObjectOutputStream(Files.newOutputStream(SAVED_DATABASE_FILE));
+		os.writeObject(artists);
+		os.close();
+	}
+	
+	/**
+	 * Runs all the tasks necessary at the start of the program
+	 */
+	public boolean openPlayer() {
+		try {
+			loadDatabase();
+		} catch(IOException | ClassNotFoundException e) {
+			return false;
+		}
+		return true;
+	}
+	
+	@SuppressWarnings("unchecked")
+	private void loadDatabase() throws IOException, ClassNotFoundException {
+		if (Files.exists(SAVED_DATABASE_FILE)) {
+			// Load the artists database
+			ObjectInputStream is = new ObjectInputStream(Files.newInputStream(SAVED_DATABASE_FILE));
+			artists = (List<ArtistBean>) is.readObject();
+			
+			for(ArtistBean artist : artists) {
+				System.out.println(artist.getName());
+			}
+		}
 	}
 
 	public void setVolume(double value) {
 		volume = value;
-		
-		if(player != null) {
+
+		if (player != null) {
 			player.setVolume(volume);
 		}
 	}
-	
+
 	/**
 	 * @return the pausedState
 	 */
@@ -233,7 +293,7 @@ public class MP3Model extends Observable {
 		@Override
 		public FileVisitResult visitFile(Path aFile, BasicFileAttributes aAttrs) throws IOException {
 			File file = aFile.toFile();
-			
+
 			if (file.isDirectory()) {
 				ProcessFile subProcessFile = new ProcessFile(this.count);
 				this.count = subProcessFile.count;
@@ -313,7 +373,7 @@ public class MP3Model extends Observable {
 		}
 
 		private void addTrackToDatabase(Path path, String artist, String title, String album, long milliseconds) {
-			TrackBean trackBean = new TrackBean(path, artist, title, album, new Duration(milliseconds));
+			TrackBean trackBean = new TrackBean(path.toUri(), artist, title, album, new Duration(milliseconds));
 
 			ArtistBean trackArtist = null;
 

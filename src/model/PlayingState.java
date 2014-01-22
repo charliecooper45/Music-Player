@@ -1,6 +1,7 @@
 package model;
 
 import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
@@ -15,7 +16,7 @@ public class PlayingState implements State {
 	
 	@Override
 	public void playSong(TrackBean bean) {
-		Path path = bean.getLocation();
+		Path path = Paths.get(bean.getLocation());
 		MediaPlayer player = new MediaPlayer(new Media(path.toUri().toString()));
 		model.setPlayer(player);
 		player.play();
@@ -34,6 +35,7 @@ public class PlayingState implements State {
 
 	@Override
 	public void stopSong() {
-		//TODO NEXT: Impement this stopping functionality
+		model.getPlayer().stop();
+		model.setState(model.getInitialState());
 	}
 }

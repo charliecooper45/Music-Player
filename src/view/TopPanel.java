@@ -8,6 +8,7 @@ import java.awt.GridBagLayout;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseListener;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import javafx.util.Duration;
 
@@ -21,8 +22,6 @@ import javax.swing.event.ChangeListener;
 
 import model.TrackBean;
 
-//TODO NEXT: The wrong song is being played when I click on one!
-
 /**
  * A JPanel which displays information about the track and buttons to manipulate the playing state. 
  * @author Charlie
@@ -34,7 +33,6 @@ public class TopPanel extends JPanel {
 	private JLabel time;
 	private JLabel trackInfo;
 	private JSlider volumeControl;
-	//TODO NEXT: This is not working properly
 	private JProgressBar trackProgress;
 	private JButton[] controlButtons;
 	private TrackBean currentTrack;
@@ -96,6 +94,10 @@ public class TopPanel extends JPanel {
 				controlButtons[i].setName("pause");
 				controlButtons[i].setIcon(Utils.createIcon("/view/resources/images/pauseicon.png"));
 				break;
+			case 3:
+				controlButtons[i].setName("stop");
+				controlButtons[i].setIcon(Utils.createIcon("/view/resources/images/stopicon.png"));
+				break;
 			}
 		}
 		Utils.setGBC(gc, 1, 4, 1, 1, GridBagConstraints.BOTH);
@@ -126,11 +128,20 @@ public class TopPanel extends JPanel {
 	public void updatePlayingTrack(TrackBean track) {
 		currentTrack = track;
 		trackProgress.setValue(0);
-		trackProgress.setMaximum((int) currentTrack.getLength().toSeconds());
+		trackProgress.setMaximum((int) currentTrack.getDuration().toSeconds());
 		trackInfo.setText(currentTrack.getArtist() + " - " + currentTrack.getTitle());
 		
 		// Start updating the GUI
 		new UpdateGUI().execute();
+	}
+	
+	/**
+	 * Refreshes the GUI to show the fact that no track is currently playing
+	 */
+	public void stopPlayingTrack() {
+		currentTrack = null;
+		trackInfo.setText("");
+		time.setText("0:00");
 	}
 	
 	/**
@@ -150,7 +161,7 @@ public class TopPanel extends JPanel {
 	}
 
 	// SwingWorker - loops and updates the gui components on the TopPanel
-	private class UpdateGUI extends SwingWorker<Void, Duration> {
+	private class UpdateGUI extends SwingWorker<Duration, Duration> {
 		
 		@Override
 		protected void process(List<Duration> chunks) {
@@ -167,15 +178,20 @@ public class TopPanel extends JPanel {
 			// Update the progress bar
 			trackProgress.setValue((int) trackDuration.toSeconds() + 1);
 		}
-
+		
 		@Override
-		protected Void doInBackground() throws Exception {
+		protected Duration doInBackground() throws Exception {
 			while(trackProgress.getValue() < trackProgress.getMaximum()) {
 				Duration d = topPanelListener.getCurrentTrackTime();
 				publish(d);
 				Thread.sleep(500);
 			}
-			return null;
+			return topPanelListener.getCurrentTrackTime();
+		}
+		
+		@Override
+		protected void done() {
+			stopPlayingTrack();
 		}
 	};
 }

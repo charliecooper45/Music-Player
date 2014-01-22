@@ -4,6 +4,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.File;
 import java.util.Observable;
 import java.util.Observer;
@@ -36,6 +38,7 @@ public class MP3Controller implements Observer {
 	public MP3Controller(MP3View view, MP3Model model) {
 		this.view = view;
 		this.view.setController(this);
+		this.view.addWindowListener(new WindowChangeListener());
 		this.view.addActionListener(buttonListener);
 		this.view.addMouseListener(new MouseListener());
 		this.view.addListListener(new ListListener());
@@ -83,6 +86,10 @@ public class MP3Controller implements Observer {
 					break;
 				case "pause":
 					model.pauseSong();
+					break;
+				case "stop":
+					model.stopSong(false, null);
+					view.stopPlayingTrack();
 					break;
 				case "addmusic":
 					final File[] files = view.showJFileChooser();
@@ -187,5 +194,25 @@ public class MP3Controller implements Observer {
 			}
 		}
 
+	}
+	
+	private class WindowChangeListener extends WindowAdapter {
+
+		@Override
+		public void windowOpened(WindowEvent arg0) {
+			if(!model.openPlayer()) {
+				view.displayErrorMessage("Unable to load track database");
+			}
+			
+			// Refresh the gui
+			view.updateArtists(model.getArtists());
+		}
+
+		@Override
+		public void windowClosing(WindowEvent e) {
+			if(!model.closePlayer()) {
+				view.displayErrorMessage("Unable to save track database");
+			}
+		}
 	}
 }

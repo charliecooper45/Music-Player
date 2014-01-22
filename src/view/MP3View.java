@@ -3,13 +3,16 @@ package view;
 import java.awt.BorderLayout;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseListener;
+import java.awt.event.WindowListener;
 import java.io.File;
 import java.util.List;
 
 import javafx.util.Duration;
 
+import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.filechooser.FileFilter;
@@ -55,6 +58,10 @@ public class MP3View extends JFrame {
 		bottomPanel = new BottomPanel();
 		add(bottomPanel, BorderLayout.SOUTH);
 	}
+
+	public void addWindowChangeListener(WindowListener listener) {
+		addWindowListener(listener);
+	}
 	
 	public void addActionListener(ActionListener listener) {
 		topPanel.addActionListener(listener);
@@ -87,6 +94,10 @@ public class MP3View extends JFrame {
 	
 	public void updatePlayingTrack(TrackBean track) {
 		topPanel.updatePlayingTrack(track);
+	}
+	
+	public void stopPlayingTrack() {
+		topPanel.stopPlayingTrack();
 	}
 	
 	public File[] showJFileChooser() {
@@ -134,8 +145,12 @@ public class MP3View extends JFrame {
 	public void updateArtists(List<ArtistBean> artists) {
 		middlePanel.updateArtists(artists);
 	}
-
+	
 	public void changeDisplayedArtist(ArtistBean artist) {
 		middlePanel.changeDisplayedArtist(artist);
+	}
+	
+	public void displayErrorMessage(String errorMessage) {
+		JOptionPane.showMessageDialog(this, errorMessage, "Error", JOptionPane.ERROR_MESSAGE);
 	}
 }
