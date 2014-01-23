@@ -24,6 +24,27 @@ public class AlbumBean implements Serializable {
 	}
 	
 	/**
+	 * @return the track number of the given TrackBean or -1
+	 */
+	public int getTrackNumber(TrackBean track) {
+		return tracks.indexOf(track) + 1;
+	}
+	
+	/**
+	 * @param trackNumber
+	 * @return The TrackBean associated with the trackNumber for this album
+	 */
+	public TrackBean getTrack(int trackNumber) {
+		return tracks.get(trackNumber - 1);
+	}
+	
+	/**
+	 * @return the length of the album
+	 */
+	public int getNumberOfTracks() {
+		return tracks.size();
+	}
+	/**
 	 * @return the tracks in the album
 	 */
 	public List<TrackBean> getTracks() {
@@ -44,7 +65,6 @@ public class AlbumBean implements Serializable {
 		this.title = title;
 	}
 
-	
 	@Override
 	public String toString() {
 		return title;

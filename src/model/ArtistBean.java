@@ -8,7 +8,6 @@ import java.util.List;
 /**
  * Represents an artist
  * @author Charlie
- *
  */
 public class ArtistBean implements Serializable {
 	private static final long serialVersionUID = -8571623797558533992L;

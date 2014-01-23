@@ -126,7 +126,7 @@ public class MiddlePanel extends JPanel{
 	}
 	
 	private class TracksTableModel extends AbstractTableModel {
-		private String[] colNames = {"Artist", "Title", "Length"};
+		private String[] colNames = {"Track Number", "Artist", "Title", "Length"};
 		
 		@Override
 		public String getColumnName(int column) {
@@ -140,7 +140,7 @@ public class MiddlePanel extends JPanel{
 
 		@Override
 		public int getColumnCount() {
-			return 3;
+			return 4;
 		}
 
 		@Override
@@ -149,10 +149,12 @@ public class MiddlePanel extends JPanel{
 			
 			switch(columnIndex) {
 			case 0:
-				return track.getArtist();
+				return albumsList.getSelectedValue().getTrackNumber(track);
 			case 1:
-				return track.getTitle();
+				return track.getArtist();
 			case 2:
+				return track.getTitle();
+			case 3:
 				int seconds = track.getSeconds();
 				if(seconds < 10) {
 					String secondsString = "0" + seconds;

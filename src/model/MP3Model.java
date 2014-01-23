@@ -31,8 +31,9 @@ public class MP3Model extends Observable {
 	// Holds the location of the saved database
 	private final static Path SAVED_DATABASE_FOLDER = Paths.get(System.getProperty("user.dir") + "/MediaPlayerData");
 	private final static Path SAVED_DATABASE_FILE = Paths.get(SAVED_DATABASE_FOLDER + "/data.dt");
-	// Holds the current tracks
-	private volatile List<TrackBean> currentTracks;
+	// Holds the current album (or null if a playlist is playing)
+	private volatile AlbumBean currentAlbum;
+	private int currentTrackNumber;
 	// Holds the artist database
 	private volatile List<ArtistBean> artists;
 	private MediaPlayer player;
@@ -44,20 +45,23 @@ public class MP3Model extends Observable {
 	// Holds the number of tracks processed so far out of a batch
 	private volatile int numberProcessed;
 	// Used to execute a single ProcessFileThread threads
-	//TODO NEXT B: ensure this is shutdown at somepoint
+	//TODO NEXT B: ensure the ExecutorService is shutdown at somepoint
 	private ExecutorService executor;
 	// Future that is used to manipulate the current ProcessFilesThread
 	private Future<?> future;
 
 	public MP3Model() {
 		executor = Executors.newSingleThreadExecutor();
-		currentTracks = new ArrayList<>();
 		artists = new ArrayList<>();
 
 		initialState = new InitialState(this);
 		playingState = new PlayingState(this);
 		pausedState = new PausedState(this);
 		state = initialState;
+	}
+
+	public TrackBean getTrack(int trackNumber) {
+		return currentAlbum.getTrack(trackNumber);
 	}
 
 	public int getMP3Count(File... files) {
@@ -106,10 +110,6 @@ public class MP3Model extends Observable {
 		future.cancel(true);
 	}
 
-	public TrackBean getTrack(int trackNo) {
-		return currentTracks.get(trackNo);
-	}
-
 	public List<ArtistBean> getArtists() {
 		List<ArtistBean> artistStrings = new ArrayList<>();
 
@@ -143,13 +143,45 @@ public class MP3Model extends Observable {
 		return numberProcessed;
 	}
 
-	public void setCurrentTracks(List<TrackBean> currentTracks) {
-		this.currentTracks = currentTracks;
+	public void setAlbum(AlbumBean currentAlbum) {
+		this.currentAlbum = currentAlbum;
+
+		System.out.println("Current tracks:");
 	}
 
 	//TODO NEXT B: Document
 	public void playSong(TrackBean track) {
+		this.currentTrackNumber = currentAlbum.getTrackNumber(track);
+		System.err.println("Current track number = " + currentTrackNumber);
 		state.playSong(track);
+	}
+
+	/**
+	 * Checks if there is another song in the current playlist, if there is then plays it
+	 */
+	public void playNextSong() {
+		if (state != initialState) {
+			//TODO NEXT: test playing an album, also test with different states
+			currentTrackNumber++;
+			System.out.println("Current track number: " + currentTrackNumber);
+			System.out.println("Album size: " + currentAlbum.getNumberOfTracks());
+
+			if (currentTrackNumber <= currentAlbum.getNumberOfTracks()) {
+				if(player != null) 
+					player.stop();
+				
+				TrackBean newTrack = currentAlbum.getTrack(currentTrackNumber);
+				System.out.println("now playing: " + newTrack.getTitle() + " " + currentTrackNumber);
+
+				playSong(newTrack);
+
+				setChanged();
+				notifyObservers(newTrack);
+			} else {
+				System.out.println("The album is finished");
+				state.stopSong();
+			}
+		}
 	}
 
 	public void pauseSong() {
@@ -199,27 +231,27 @@ public class MP3Model extends Observable {
 		os.writeObject(artists);
 		os.close();
 	}
-	
+
 	/**
 	 * Runs all the tasks necessary at the start of the program
 	 */
 	public boolean openPlayer() {
 		try {
 			loadDatabase();
-		} catch(IOException | ClassNotFoundException e) {
+		} catch (IOException | ClassNotFoundException e) {
 			return false;
 		}
 		return true;
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	private void loadDatabase() throws IOException, ClassNotFoundException {
 		if (Files.exists(SAVED_DATABASE_FILE)) {
 			// Load the artists database
 			ObjectInputStream is = new ObjectInputStream(Files.newInputStream(SAVED_DATABASE_FILE));
 			artists = (List<ArtistBean>) is.readObject();
-			
-			for(ArtistBean artist : artists) {
+
+			for (ArtistBean artist : artists) {
 				System.out.println(artist.getName());
 			}
 		}
@@ -331,7 +363,7 @@ public class MP3Model extends Observable {
 				}
 			}
 			setChanged();
-			notifyObservers();
+			notifyObservers(artists);
 		}
 
 		//TODO NEXT: use the track number and genre in the table (configurable columns?)

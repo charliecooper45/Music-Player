@@ -2,7 +2,6 @@ package model;
 
 import java.io.Serializable;
 import java.net.URI;
-import java.nio.file.Path;
 
 import javafx.util.Duration;
 
@@ -16,7 +15,6 @@ public class TrackBean implements Serializable {
 	private String artist;
 	private String title;
 	private String album;
-	@SuppressWarnings("unused")
 	private TrackDuration trackDuration;
 	private transient Duration duration;
 	
@@ -121,14 +119,16 @@ public class TrackBean implements Serializable {
 	public void setDuration(Duration duration) {
 		this.duration = duration;
 	}
-	
+
+
+
+
 	/**
 	 * Class that allow the track duration to be serialized.
 	 * @author Charlie
 	 */
 	private class TrackDuration implements Serializable {
 		private static final long serialVersionUID = -7289995643505042778L;
-		@SuppressWarnings("unused")
 		private double milliseconds;
 		
 		public TrackDuration(double milliseconds) {

@@ -8,7 +8,6 @@ import java.awt.GridBagLayout;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseListener;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 import javafx.util.Duration;
 
@@ -36,9 +35,8 @@ public class TopPanel extends JPanel {
 	private JProgressBar trackProgress;
 	private JButton[] controlButtons;
 	private TrackBean currentTrack;
-	
-	//TODO NEXT: Top panel is resizing dynamically, need to prevent this
 	private TopPanelListener topPanelListener;
+	//TODO NEXT: Top panel is resizing dynamically, need to prevent this
 
 	public TopPanel() {
 		setLayout(new GridBagLayout());
@@ -98,6 +96,10 @@ public class TopPanel extends JPanel {
 				controlButtons[i].setName("stop");
 				controlButtons[i].setIcon(Utils.createIcon("/view/resources/images/stopicon.png"));
 				break;
+			case 4:
+				controlButtons[i].setName("forward");
+				controlButtons[i].setIcon(Utils.createIcon("/view/resources/images/forwardicon.png"));
+				break;
 			}
 		}
 		Utils.setGBC(gc, 1, 4, 1, 1, GridBagConstraints.BOTH);
@@ -142,6 +144,9 @@ public class TopPanel extends JPanel {
 		currentTrack = null;
 		trackInfo.setText("");
 		time.setText("0:00");
+		
+		// Alert the main view class that the track has finished playing
+		topPanelListener.trackFinished();
 	}
 	
 	/**

@@ -9,7 +9,6 @@ import java.util.List;
 
 import javafx.util.Duration;
 
-import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -48,6 +47,12 @@ public class MP3View extends JFrame {
 			@Override
 			public Duration getCurrentTrackTime() {
 				return controller.getCurrentTrackTime();
+			}
+
+			@Override
+			public void trackFinished() {
+				// The current track has finished playing so alert the controller
+				controller.songFinished();
 			}
 		});
 		add(topPanel, BorderLayout.NORTH);

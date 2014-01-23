@@ -7,6 +7,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
+import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -60,10 +61,19 @@ public class MP3Controller implements Observer {
 		return model.getNumberProcessed();
 	}
 
+	public void songFinished() {
+		model.playNextSong();
+	}
+	
 	@Override
 	public void update(Observable o, Object arg) {
 		if (o instanceof MP3Model) {
-			view.updateArtists(model.getArtists());
+			if(arg instanceof List) {
+				view.updateArtists(model.getArtists());
+			} else if(arg instanceof TrackBean) {
+				view.updatePlayingTrack((TrackBean) arg);
+				System.err.println("Update the playing track");
+			}
 		}
 	}
 
@@ -90,6 +100,9 @@ public class MP3Controller implements Observer {
 				case "stop":
 					model.stopSong(false, null);
 					view.stopPlayingTrack();
+					break;
+				case "forward":
+					model.playNextSong();
 					break;
 				case "addmusic":
 					final File[] files = view.showJFileChooser();
@@ -128,7 +141,7 @@ public class MP3Controller implements Observer {
 			if (source instanceof JTable) {
 				JTable table = (JTable) source;
 				int selectedRow = table.getSelectedRow();
-				TrackBean selectedTrack = getTrack(selectedRow);
+				TrackBean selectedTrack = getTrack(selectedRow + 1);
 
 				if (e.getClickCount() == 2) {
 					model.stopSong(true, selectedTrack);
@@ -173,7 +186,7 @@ public class MP3Controller implements Observer {
 					// Change the tracks show in the table
 					view.setTableTracks(album.getTracks());
 					// Set the current tracks held in the model
-					model.setCurrentTracks(album.getTracks());
+					model.setAlbum(album);
 				}
 			}
 		}
