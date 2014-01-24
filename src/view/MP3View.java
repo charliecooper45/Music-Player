@@ -16,6 +16,7 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.filechooser.FileFilter;
 
+import model.AlbumBean;
 import model.ArtistBean;
 import model.TrackBean;
 import controller.MP3Controller;
@@ -151,11 +152,19 @@ public class MP3View extends JFrame {
 		middlePanel.updateArtists(artists);
 	}
 	
-	public void changeDisplayedArtist(ArtistBean artist) {
-		middlePanel.changeDisplayedArtist(artist);
-	}
-	
 	public void displayErrorMessage(String errorMessage) {
 		JOptionPane.showMessageDialog(this, errorMessage, "Error", JOptionPane.ERROR_MESSAGE);
+	}
+
+	public void changeMuteIcon() {
+		topPanel.changeMuteIcon();
+	}
+
+	public void changeDisplayedArtist(ArtistBean artist) {
+		middlePanel.changeDisplayedAlbums(artist.getAlbums());
+	}
+	
+	public void displayAllAlbums(List<AlbumBean> albums) {
+		middlePanel.changeDisplayedAlbums(albums);
 	}
 }

@@ -24,6 +24,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import model.AlbumBean;
+import model.AllArtistsBean;
 import model.ArtistBean;
 import model.MP3Model;
 import model.TrackBean;
@@ -64,15 +65,17 @@ public class MP3Controller implements Observer {
 	public void songFinished() {
 		model.playNextSong();
 	}
-	
+
 	@Override
 	public void update(Observable o, Object arg) {
 		if (o instanceof MP3Model) {
-			if(arg instanceof List) {
+			if (arg instanceof List) {
 				view.updateArtists(model.getArtists());
-			} else if(arg instanceof TrackBean) {
+			} else if (arg instanceof TrackBean) {
 				view.updatePlayingTrack((TrackBean) arg);
 				System.err.println("Update the playing track");
+			} else if (arg == null) {
+				view.stopPlayingTrack();
 			}
 		}
 	}
@@ -89,6 +92,9 @@ public class MP3Controller implements Observer {
 				String buttonName = button.getName();
 
 				switch (buttonName) {
+				case "backward":
+					model.playPreviousSong();
+					break;
 				case "play":
 					if (model.getState() == model.getPausedState()) {
 						model.resumeSong();
@@ -127,6 +133,11 @@ public class MP3Controller implements Observer {
 				case "cancel":
 					model.stopProcessThread();
 					view.disposeProgressDialog();
+					break;
+				case "mute":
+					model.mute();
+					view.changeMuteIcon();
+					System.out.println("mute");
 					break;
 				}
 			}
@@ -176,10 +187,16 @@ public class MP3Controller implements Observer {
 
 				// Check the type of the selected object
 				if (selected instanceof ArtistBean) {
-					ArtistBean artist = (ArtistBean) selected;
-
-					// Update the album list to reflect the change of artist
-					view.changeDisplayedArtist(artist);
+					if(selected instanceof AllArtistsBean) {
+						// Display all the albums
+						view.displayAllAlbums(model.getAllAlbums());
+					} else {
+						ArtistBean artist = (ArtistBean) selected;
+						
+						// Update the album list to reflect the change of artist
+						view.changeDisplayedArtist(artist);
+					}
+					
 				} else if (selected != null) {
 					AlbumBean album = (AlbumBean) selected;
 
@@ -196,11 +213,11 @@ public class MP3Controller implements Observer {
 		@Override
 		public void stateChanged(ChangeEvent e) {
 			Object source = e.getSource();
-			
+
 			if (source instanceof JSlider) {
 				JSlider slider = (JSlider) source;
 				int value = slider.getValue();
-				
+
 				// Convert to a double value for use with the model 
 				double doubleValue = (double) (value / 100.0);
 				model.setVolume(doubleValue);
@@ -208,22 +225,22 @@ public class MP3Controller implements Observer {
 		}
 
 	}
-	
+
 	private class WindowChangeListener extends WindowAdapter {
 
 		@Override
 		public void windowOpened(WindowEvent arg0) {
-			if(!model.openPlayer()) {
+			if (!model.openPlayer()) {
 				view.displayErrorMessage("Unable to load track database");
 			}
-			
+
 			// Refresh the gui
 			view.updateArtists(model.getArtists());
 		}
 
 		@Override
 		public void windowClosing(WindowEvent e) {
-			if(!model.closePlayer()) {
+			if (!model.closePlayer()) {
 				view.displayErrorMessage("Unable to save track database");
 			}
 		}

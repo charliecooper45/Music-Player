@@ -24,7 +24,6 @@ import model.TrackBean;
 /**
  * A JPanel which displays information about the track and buttons to manipulate the playing state. 
  * @author Charlie
- *
  */
 @SuppressWarnings("serial")
 public class TopPanel extends JPanel {
@@ -36,6 +35,7 @@ public class TopPanel extends JPanel {
 	private JButton[] controlButtons;
 	private TrackBean currentTrack;
 	private TopPanelListener topPanelListener;
+	private boolean muted = false;
 	//TODO NEXT: Top panel is resizing dynamically, need to prevent this
 
 	public TopPanel() {
@@ -83,6 +83,8 @@ public class TopPanel extends JPanel {
 			// Load the icons for each image
 			switch(i) {
 			case 0:
+				controlButtons[i].setName("backward");
+				controlButtons[i].setIcon(Utils.createIcon("/view/resources/images/backwardicon.png"));
 				break;
 			case 1:
 				controlButtons[i].setName("play");
@@ -100,6 +102,10 @@ public class TopPanel extends JPanel {
 				controlButtons[i].setName("forward");
 				controlButtons[i].setIcon(Utils.createIcon("/view/resources/images/forwardicon.png"));
 				break;
+			case 5:
+				controlButtons[i].setName("mute");
+				controlButtons[i].setIcon(Utils.createIcon("/view/resources/images/muteicon.png"));
+				break;
 			}
 		}
 		Utils.setGBC(gc, 1, 4, 1, 1, GridBagConstraints.BOTH);
@@ -108,6 +114,16 @@ public class TopPanel extends JPanel {
 		add(modeButtonsPanel, gc);
 	}
 
+	public void changeMuteIcon() {
+		muted = !muted;
+		
+		if(muted) {
+			controlButtons[5].setIcon(Utils.createIcon("/view/resources/images/unmuteicon.png"));
+		} else {
+			controlButtons[5].setIcon(Utils.createIcon("/view/resources/images/muteicon.png"));
+		}
+	}
+	
 	/**
 	 * Adds an ActionListener from the view to the appropriate components
 	 * @param listener
@@ -144,6 +160,7 @@ public class TopPanel extends JPanel {
 		currentTrack = null;
 		trackInfo.setText("");
 		time.setText("0:00");
+		trackProgress.setValue(0);
 		
 		// Alert the main view class that the track has finished playing
 		topPanelListener.trackFinished();

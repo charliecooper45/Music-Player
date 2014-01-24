@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.DefaultListModel;
+import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -15,6 +16,7 @@ import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.DefaultTableCellRenderer;
 
 import model.AlbumBean;
 import model.ArtistBean;
@@ -48,12 +50,17 @@ public class MiddlePanel extends JPanel{
 		
 		tableModel = new TracksTableModel();
 		tracksTable = new JTable(tableModel);
+		DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+		centerRenderer.setHorizontalAlignment(JLabel.CENTER);
+		tracksTable.getColumnModel().getColumn(0).setCellRenderer(centerRenderer);
+		tracksTable.getColumnModel().getColumn(0).setMinWidth(150);
+		tracksTable.getColumnModel().getColumn(0).setMaxWidth(150);
+		
 		add(new JScrollPane(tracksTable), BorderLayout.CENTER);
 		tableModel.fireTableDataChanged();
 	}
 	
 	private void setupListsPanel() {
-		// TODO NEXT B: Set this up with labels for "Artist" and "Album" to make it clearer to the user.
 		artistsListModel = new DefaultListModel<>();
 		artistsList = new JList<>(artistsListModel);
 		artistsList.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
@@ -103,10 +110,10 @@ public class MiddlePanel extends JPanel{
 		}
 	}
 	
-	public void changeDisplayedArtist(ArtistBean artist) {
+	public void changeDisplayedAlbums(List<AlbumBean> albums) {
 		albumsListModel.clear();
 		
-		for(AlbumBean album : artist.getAlbums()) {
+		for(AlbumBean album : albums) {
 			albumsListModel.addElement(album);
 		}
 		
