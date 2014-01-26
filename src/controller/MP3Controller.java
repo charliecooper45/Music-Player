@@ -34,6 +34,7 @@ public class MP3Controller implements Observer {
 	private MP3View view;
 	private MP3Model model;
 
+	//TODO NEXT: Check for unused methods
 	// Listeners 
 	private ButtonListener buttonListener = new ButtonListener();
 

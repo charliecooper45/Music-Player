@@ -29,7 +29,7 @@ import model.TrackBean;
  */
 @SuppressWarnings("serial")
 public class MiddlePanel extends JPanel{
-	
+	//TODO NEXT: If you play an album then move from ALL() -> artist or vice versa your playlist is cancelled
 	private JList<ArtistBean> artistsList;
 	private DefaultListModel<ArtistBean> artistsListModel;
 	private JList<AlbumBean> albumsList;
@@ -156,7 +156,7 @@ public class MiddlePanel extends JPanel{
 			
 			switch(columnIndex) {
 			case 0:
-				return albumsList.getSelectedValue().getTrackNumber(track);
+				return track.getAlbum().getTrackNumber(track);
 			case 1:
 				return track.getArtist();
 			case 2:

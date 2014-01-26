@@ -25,23 +25,23 @@ public class ArtistBean implements Serializable {
 		this.name = name;
 	}
 	
-	public void addTrack(TrackBean track) {
-		AlbumBean album = null;
-		
-		// Check if the track is part of a new album
-		for(AlbumBean bean : albums) {
-			if(bean.getTitle().equals(track.getAlbum())) {
-				album = bean;
-				break;
+	/**
+	 * @return a specified album or null if it does not exist
+	 */
+	public AlbumBean getAlbum(String name) {
+		for(AlbumBean album : albums) {
+			if(album.getTitle().equals(name)) {
+				return album;
 			}
 		}
-
-		if(album == null) {
-			// Create a new album
-			album = new AlbumBean(track.getAlbum());
-			albums.add(album);
-		}
+		return null;
+	}
 	
+	public void addTrack(TrackBean track, AlbumBean album) {
+		// Check if this is a new album
+		if(!albums.contains(album))
+			albums.add(album);
+
 		album.addTrack(track);
 	}
 

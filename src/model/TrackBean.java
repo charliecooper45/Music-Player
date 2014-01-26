@@ -14,7 +14,7 @@ public class TrackBean implements Serializable {
 	private URI location;
 	private String artist;
 	private String title;
-	private String album;
+	private AlbumBean album;
 	private TrackDuration trackDuration;
 	private transient Duration duration;
 	
@@ -24,7 +24,7 @@ public class TrackBean implements Serializable {
 		this.location = location;
 	}
 	
-	public TrackBean(URI location, String artist, String title, String album, Duration duration) {
+	public TrackBean(URI location, String artist, String title, AlbumBean album, Duration duration) {
 		this.location = location;
 		this.artist = artist;
 		this.title = title;
@@ -78,14 +78,14 @@ public class TrackBean implements Serializable {
 	/**
 	 * @return the album
 	 */
-	public String getAlbum() {
+	public AlbumBean getAlbum() {
 		return album;
 	}
 
 	/**
 	 * @param album the album to set
 	 */
-	public void setAlbum(String album) {
+	public void setAlbum(AlbumBean album) {
 		this.album = album;
 	}
 

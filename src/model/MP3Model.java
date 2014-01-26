@@ -31,7 +31,7 @@ public class MP3Model extends Observable {
 	// Holds the location of the saved database
 	private final static Path SAVED_DATABASE_FOLDER = Paths.get(System.getProperty("user.dir") + "/MediaPlayerData");
 	private final static Path SAVED_DATABASE_FILE = Paths.get(SAVED_DATABASE_FOLDER + "/data.dt");
-	// Holds the current album (or null if a playlist is playing)
+	// Holds the current album 
 	private volatile AlbumBean currentAlbum;
 	private int currentTrackNumber;
 	// Holds the artist database
@@ -159,8 +159,6 @@ public class MP3Model extends Observable {
 	
 	public void setAlbum(AlbumBean currentAlbum) {
 		this.currentAlbum = currentAlbum;
-
-		System.out.println("Current tracks:");
 	}
 
 	//TODO NEXT B: Document
@@ -186,16 +184,12 @@ public class MP3Model extends Observable {
 		if (state != initialState) {
 			//TODO NEXT: test playing an album, also test with different states
 			currentTrackNumber++;
-			System.out.println("Current track number: " + currentTrackNumber);
-			System.out.println("Album size: " + currentAlbum.getNumberOfTracks());
 
 			if (currentTrackNumber <= currentAlbum.getNumberOfTracks()) {
 				if (player != null)
 					player.stop();
 
 				newTrack = currentAlbum.getTrack(currentTrackNumber);
-				System.out.println("now playing: " + newTrack.getTitle() + " " + currentTrackNumber);
-
 				playSong(newTrack);
 			} else {
 				System.out.println("The album is finished");
@@ -462,14 +456,22 @@ public class MP3Model extends Observable {
 		}
 
 		private void addTrackToDatabase(Path path, String artist, String title, String album, long milliseconds) {
-			TrackBean trackBean = new TrackBean(path.toUri(), artist, title, album, new Duration(milliseconds));
-
+			AlbumBean trackAlbum = null;
+			TrackBean trackBean = null;
 			ArtistBean trackArtist = null;
 
 			// Check if the artist is already listed in the database
-			for (ArtistBean bean : artists) {
-				if (bean.getName().equals(artist)) {
-					trackArtist = bean;
+			for (ArtistBean artistBean : artists) {
+				if (artistBean.getName().equals(artist)) {
+					// Check if the artist has this album
+					trackAlbum = artistBean.getAlbum(album);
+					
+					if(trackAlbum == null) {
+						// No album was found for the artist so create a new album
+						trackAlbum = new AlbumBean(album);
+					}
+					
+					trackArtist = artistBean;
 					break;
 				}
 			}
@@ -482,9 +484,13 @@ public class MP3Model extends Observable {
 				// update the number of artists
 				AllArtistsBean all = (AllArtistsBean) artists.get(0);
 				all.setNumberOfArtists(artists.size() - 1);
+				
+				// Create a new album for the artists
+				trackAlbum = new AlbumBean(album); 
 			}
 
-			trackArtist.addTrack(trackBean);
+			trackBean = new TrackBean(path.toUri(), artist, title, trackAlbum, new Duration(milliseconds));
+			trackArtist.addTrack(trackBean, trackAlbum);
 		}
 	}
 }
