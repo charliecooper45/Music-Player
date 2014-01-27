@@ -16,6 +16,7 @@ public class TrackBean implements Serializable {
 	private String title;
 	private AlbumBean album;
 	private TrackDuration trackDuration;
+	private String genre;
 	private transient Duration duration;
 	
 	public TrackBean() {}
@@ -24,13 +25,14 @@ public class TrackBean implements Serializable {
 		this.location = location;
 	}
 	
-	public TrackBean(URI location, String artist, String title, AlbumBean album, Duration duration) {
+	public TrackBean(URI location, String artist, String title, AlbumBean album, Duration duration, String genre) {
 		this.location = location;
 		this.artist = artist;
 		this.title = title;
 		this.album = album;
 		this.duration = duration;
 		this.trackDuration = new TrackDuration(duration.toMillis()); 
+		this.genre = genre;
 	}
 
 	/**
@@ -120,8 +122,19 @@ public class TrackBean implements Serializable {
 		this.duration = duration;
 	}
 
+	/**
+	 * @return the genre
+	 */
+	public String getGenre() {
+		return genre;
+	}
 
-
+	/**
+	 * @param genre the genre to set
+	 */
+	public void setGenre(String genre) {
+		this.genre = genre;
+	}
 
 	/**
 	 * Class that allow the track duration to be serialized.

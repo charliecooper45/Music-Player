@@ -6,6 +6,7 @@ import java.awt.event.MouseListener;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.BorderFactory;
 import javax.swing.DefaultListModel;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -25,11 +26,9 @@ import model.TrackBean;
 /**
  * A JPanel that displays the tracks in the user`s library.
  * @author Charlie
- *
  */
 @SuppressWarnings("serial")
 public class MiddlePanel extends JPanel{
-	//TODO NEXT: If you play an album then move from ALL() -> artist or vice versa your playlist is cancelled
 	private JList<ArtistBean> artistsList;
 	private DefaultListModel<ArtistBean> artistsListModel;
 	private JList<AlbumBean> albumsList;
@@ -38,6 +37,7 @@ public class MiddlePanel extends JPanel{
 	private TracksTableModel tableModel;
 	// Holds the current songs to display in the table at the bottom of the panel
 	private List<TrackBean> tableTracks; 
+	private PlaylistPanel playlistPanel;
 	
 	public MiddlePanel() {
 		tableTracks = new ArrayList<>();
@@ -48,16 +48,22 @@ public class MiddlePanel extends JPanel{
 	private void init() {
 		setupListsPanel();
 		
+		// Setup the table to hold the track information
 		tableModel = new TracksTableModel();
 		tracksTable = new JTable(tableModel);
 		DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
 		centerRenderer.setHorizontalAlignment(JLabel.CENTER);
-		tracksTable.getColumnModel().getColumn(0).setCellRenderer(centerRenderer);
+		for(int i=0; i<tracksTable.getColumnCount(); i++) {
+			tracksTable.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
+		}
 		tracksTable.getColumnModel().getColumn(0).setMinWidth(150);
 		tracksTable.getColumnModel().getColumn(0).setMaxWidth(150);
 		
 		add(new JScrollPane(tracksTable), BorderLayout.CENTER);
 		tableModel.fireTableDataChanged();
+		
+		playlistPanel = new PlaylistPanel();
+		add(playlistPanel, BorderLayout.WEST);
 	}
 	
 	private void setupListsPanel() {
@@ -120,6 +126,14 @@ public class MiddlePanel extends JPanel{
 		albumsList.setSelectedIndex(0);
 	}
 	
+	public void setDisplayedPlaylist(List<TrackBean> playlist) {
+		playlistPanel.setDisplayedPlaylist(playlist);
+	}
+	
+	public void updatePlaylist(TrackBean track) {
+		playlistPanel.updatePlaylist(track);
+	}
+	
 	/**
 	 * @param tableTracks the tableTracks to set
 	 */
@@ -132,8 +146,12 @@ public class MiddlePanel extends JPanel{
 		return artistsList.getSelectedValue();
 	}
 	
+	public AlbumBean getSelectedAlbum() {
+		return albumsList.getSelectedValue();
+	}
+	
 	private class TracksTableModel extends AbstractTableModel {
-		private String[] colNames = {"Track Number", "Artist", "Title", "Length"};
+		private String[] colNames = {"Track Number", "Artist", "Title", "Length", "Genre"};
 		
 		@Override
 		public String getColumnName(int column) {
@@ -147,7 +165,7 @@ public class MiddlePanel extends JPanel{
 
 		@Override
 		public int getColumnCount() {
-			return 4;
+			return 5;
 		}
 
 		@Override
@@ -168,8 +186,70 @@ public class MiddlePanel extends JPanel{
 					return track.getMinutes() + ":" + secondsString;
 				}
 				return track.getMinutes() + ":" + seconds;
+			case 4:
+				return track.getGenre();
 			}
 			return null;
+		}
+	}
+
+	/**
+	 * Class that manages the panel holding the playlist of tracks.
+	 * @author Charlie
+	 */
+	private class PlaylistPanel extends JPanel {
+		//TODO NEXT: Add more functionality for this - custom playlists
+		private JTable playlistTable;
+		private List<TrackBean> displayedTracks;
+		private AbstractTableModel playlistTableModel;
+		
+		public PlaylistPanel() {
+			setPreferredSize(new Dimension(200, 300));
+			setLayout(new BorderLayout());
+			setBorder(BorderFactory.createEtchedBorder());
+			
+			init();
+		}
+		
+		private void init() {
+			displayedTracks = new ArrayList<TrackBean>();
+			JLabel upNextLabel = new JLabel("Up next:");
+			add(upNextLabel, BorderLayout.NORTH);
+			
+			playlistTable = new JTable();
+			playlistTableModel = new AbstractTableModel() {
+				@Override
+				public Object getValueAt(int rowIndex, int columnIndex) {
+					TrackBean track = displayedTracks.get(rowIndex);
+					return (rowIndex + 1) + ": " + track.getTitle();
+				}
+				
+				@Override
+				public int getRowCount() {
+					return displayedTracks.size();
+				}
+				
+				@Override
+				public int getColumnCount() {
+					return 1;
+				}
+			};
+			playlistTable.setModel(playlistTableModel);
+			add(playlistTable, BorderLayout.CENTER);
+		}
+		
+		/**
+		 * @param playlist the playlist to display
+		 */
+		public void setDisplayedPlaylist(List<TrackBean> playlist) {
+			displayedTracks = new ArrayList<>(playlist);
+			
+			playlistTableModel.fireTableDataChanged();
+		}
+	
+		public void updatePlaylist(TrackBean track) {
+			displayedTracks.remove(track);
+			playlistTableModel.fireTableDataChanged();
 		}
 	}
 }

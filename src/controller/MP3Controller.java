@@ -74,7 +74,6 @@ public class MP3Controller implements Observer {
 				view.updateArtists(model.getArtists());
 			} else if (arg instanceof TrackBean) {
 				view.updatePlayingTrack((TrackBean) arg);
-				System.err.println("Update the playing track");
 			} else if (arg == null) {
 				view.stopPlayingTrack();
 			}
@@ -138,7 +137,6 @@ public class MP3Controller implements Observer {
 				case "mute":
 					model.mute();
 					view.changeMuteIcon();
-					System.out.println("mute");
 					break;
 				}
 			}
@@ -151,6 +149,7 @@ public class MP3Controller implements Observer {
 			Object source = e.getSource();
 
 			if (source instanceof JTable) {
+				model.setAlbum(view.getSelectedAlbum());
 				JTable table = (JTable) source;
 				int selectedRow = table.getSelectedRow();
 				TrackBean selectedTrack = getTrack(selectedRow + 1);
@@ -159,6 +158,7 @@ public class MP3Controller implements Observer {
 					model.stopSong(true, selectedTrack);
 					model.playSong(selectedTrack);
 					view.updatePlayingTrack(selectedTrack);
+					view.setDisplayedPlaylist(model.getPlaylist());
 				}
 			} else if (source instanceof JProgressBar) {
 				JProgressBar progressBar = (JProgressBar) source;
@@ -203,8 +203,6 @@ public class MP3Controller implements Observer {
 
 					// Change the tracks show in the table
 					view.setTableTracks(album.getTracks());
-					// Set the current tracks held in the model
-					model.setAlbum(album);
 				}
 			}
 		}

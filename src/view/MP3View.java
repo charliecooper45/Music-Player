@@ -100,6 +100,7 @@ public class MP3View extends JFrame {
 	
 	public void updatePlayingTrack(TrackBean track) {
 		topPanel.updatePlayingTrack(track);
+		middlePanel.updatePlaylist(track);
 	}
 	
 	public void stopPlayingTrack() {
@@ -166,5 +167,13 @@ public class MP3View extends JFrame {
 	
 	public void displayAllAlbums(List<AlbumBean> albums) {
 		middlePanel.changeDisplayedAlbums(albums);
+	}
+
+	public void setDisplayedPlaylist(List<TrackBean> playlist) {
+		middlePanel.setDisplayedPlaylist(playlist);
+	}
+	
+	public AlbumBean getSelectedAlbum() {
+		return middlePanel.getSelectedAlbum();
 	}
 }

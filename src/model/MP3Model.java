@@ -37,6 +37,7 @@ public class MP3Model extends Observable {
 	// Holds the artist database
 	private volatile List<ArtistBean> artists;
 	private MediaPlayer player;
+	private boolean playerMuted = false;
 	private double volume = 0.5;
 	private State state;
 	private State initialState;
@@ -61,6 +62,14 @@ public class MP3Model extends Observable {
 		state = initialState;
 	}
 
+	/**
+	 * @return the songs remaining to be played in the current album or playlist
+	 */
+	public List<TrackBean> getPlaylist() {
+		System.err.println("Current track number = " + currentTrackNumber);
+		return currentAlbum.getTracks().subList(currentTrackNumber, currentAlbum.getNumberOfTracks());
+	}
+	
 	public TrackBean getTrack(int trackNumber) {
 		return currentAlbum.getTrack(trackNumber);
 	}
@@ -128,11 +137,8 @@ public class MP3Model extends Observable {
 
 	public void setTrackPercentagePlayed(int percentage) {
 		if (player != null) {
-			System.out.println("Seeking! + percentage: " + percentage);
 			Duration totalDuration = player.getTotalDuration();
 			Duration time = (totalDuration.divide(100).multiply(percentage));
-			System.out.println("Total duration: " + totalDuration);
-			System.out.println("Skip to: " + time);
 			player.seek(time);
 		}
 	}
@@ -157,22 +163,20 @@ public class MP3Model extends Observable {
 		return allAlbums;
 	}
 	
+	/**
+	 * Used if the user wants to play an album
+	 * @param currentAlbum the album to play
+	 */
 	public void setAlbum(AlbumBean currentAlbum) {
 		this.currentAlbum = currentAlbum;
 	}
 
 	//TODO NEXT B: Document
 	public void playSong(TrackBean track) {
-		boolean muted = false;
-		
-		if(player != null) 
-			muted = player.isMute();
-		
 		this.currentTrackNumber = currentAlbum.getTrackNumber(track);
-		System.err.println("Current track number = " + currentTrackNumber);
 		state.playSong(track);
 		
-		player.setMute(muted);
+		player.setMute(playerMuted);
 	}
 
 	/**
@@ -206,8 +210,6 @@ public class MP3Model extends Observable {
 	public void playPreviousSong() {
 		if (state != initialState) {
 			currentTrackNumber--;
-			System.out.println("Current track number: " + currentTrackNumber);
-			System.out.println("Album size: " + currentAlbum.getNumberOfTracks());
 
 			if (currentTrackNumber < 1) {
 				currentTrackNumber = 1;
@@ -217,7 +219,6 @@ public class MP3Model extends Observable {
 				player.stop();
 
 			TrackBean newTrack = currentAlbum.getTrack(currentTrackNumber);
-			System.out.println("now playing: " + newTrack.getTitle() + " " + currentTrackNumber);
 
 			playSong(newTrack);
 
@@ -227,10 +228,11 @@ public class MP3Model extends Observable {
 	}
 
 	public void mute() {
+		playerMuted = !playerMuted;
+		
 		if(player != null) { 
-			boolean muted = player.isMute();
-			player.setMute(!muted);
-		}
+			player.setMute(playerMuted);
+		} 
 	}
 	
 	public void pauseSong() {
@@ -421,8 +423,7 @@ public class MP3Model extends Observable {
 		private void createTrack(File file) {
 			numberProcessed = numberProcessed + 1;
 			Mp3File mp3File;
-			String track, artist, title, album, year;
-			int genre;
+			String track, artist, title, album, year, genre;
 			try {
 				mp3File = new Mp3File(file.getAbsolutePath());
 
@@ -433,7 +434,7 @@ public class MP3Model extends Observable {
 					title = id3v1Tag.getTitle();
 					album = id3v1Tag.getAlbum();
 					year = id3v1Tag.getYear();
-					genre = id3v1Tag.getGenre();
+					genre = id3v1Tag.getGenreDescription();
 				} else if (mp3File.hasId3v2Tag()) {
 					ID3v1 id3v2Tag = mp3File.getId3v2Tag();
 					track = id3v2Tag.getTrack();
@@ -441,21 +442,21 @@ public class MP3Model extends Observable {
 					title = id3v2Tag.getTitle();
 					album = id3v2Tag.getAlbum();
 					year = id3v2Tag.getYear();
-					genre = id3v2Tag.getGenre();
+					genre = id3v2Tag.getGenreDescription();
 				} else {
 					//TODO NEXT B: Add correct behaviour - look up documentation to see if there is another way to read data
 					System.err.println("Cannot read track data");
 					return;
 				}
 
-				addTrackToDatabase(Paths.get(file.toURI()), artist, title, album, mp3File.getLengthInMilliseconds());
+				addTrackToDatabase(Paths.get(file.toURI()), artist, title, album, mp3File.getLengthInMilliseconds(), genre);
 			} catch (UnsupportedTagException | InvalidDataException | IOException e) {
 				//TODO NEXT B: Produce error to show that the user has deleted a file while it is being processed (check for interrupt)
 				e.printStackTrace();
 			}
 		}
 
-		private void addTrackToDatabase(Path path, String artist, String title, String album, long milliseconds) {
+		private void addTrackToDatabase(Path path, String artist, String title, String album, long milliseconds, String genre) {
 			AlbumBean trackAlbum = null;
 			TrackBean trackBean = null;
 			ArtistBean trackArtist = null;
@@ -488,8 +489,8 @@ public class MP3Model extends Observable {
 				// Create a new album for the artists
 				trackAlbum = new AlbumBean(album); 
 			}
-
-			trackBean = new TrackBean(path.toUri(), artist, title, trackAlbum, new Duration(milliseconds));
+			
+			trackBean = new TrackBean(path.toUri(), artist, title, trackAlbum, new Duration(milliseconds), genre);
 			trackArtist.addTrack(trackBean, trackAlbum);
 		}
 	}
