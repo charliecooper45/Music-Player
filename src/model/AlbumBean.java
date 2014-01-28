@@ -31,19 +31,22 @@ public class AlbumBean implements Serializable {
 	}
 	
 	/**
+	 * @param track in the album
+	 * @return a copy of the collection holding the tracks from the current track onwards
+	 */
+	public List<TrackBean> getTracks(TrackBean track) {
+		return tracks.subList(getTrackNumber(track) - 1, tracks.size());
+	}
+	
+	/**
 	 * @param trackNumber
 	 * @return The TrackBean associated with the trackNumber for this album
 	 */
 	public TrackBean getTrack(int trackNumber) {
-		return tracks.get(trackNumber - 1);
+		return tracks.get(trackNumber);
 	}
 	
-	/**
-	 * @return the length of the album
-	 */
-	public int getNumberOfTracks() {
-		return tracks.size();
-	}
+	
 	/**
 	 * @return the tracks in the album
 	 */

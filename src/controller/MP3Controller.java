@@ -36,7 +36,7 @@ public class MP3Controller implements Observer {
 
 	//TODO NEXT: Check for unused methods
 	// Listeners 
-	private ButtonListener buttonListener = new ButtonListener();
+	private ActionListener buttonListener = new ButtonListener();
 
 	public MP3Controller(MP3View view, MP3Model model) {
 		this.view = view;
@@ -94,6 +94,7 @@ public class MP3Controller implements Observer {
 				switch (buttonName) {
 				case "backward":
 					model.playPreviousSong();
+					view.setDisplayedPlaylist(model.getPlaylist());
 					break;
 				case "play":
 					if (model.getState() == model.getPausedState()) {
@@ -123,7 +124,7 @@ public class MP3Controller implements Observer {
 								} catch (InterruptedException e) {
 									e.printStackTrace();
 								}
-								model.startProcessThread(files);
+								model.startProcessFilesThread(files);
 							}
 						};
 						new Thread(run).start();
@@ -131,7 +132,7 @@ public class MP3Controller implements Observer {
 					}
 					break;
 				case "cancel":
-					model.stopProcessThread();
+					model.stopProcessFilesThread();
 					view.disposeProgressDialog();
 					break;
 				case "mute":
@@ -152,11 +153,12 @@ public class MP3Controller implements Observer {
 				model.setAlbum(view.getSelectedAlbum());
 				JTable table = (JTable) source;
 				int selectedRow = table.getSelectedRow();
-				TrackBean selectedTrack = getTrack(selectedRow + 1);
+				TrackBean selectedTrack = getTrack(selectedRow);
 
 				if (e.getClickCount() == 2) {
 					model.stopSong(true, selectedTrack);
-					model.playSong(selectedTrack);
+					model.addAlbumToPlaylist(selectedTrack);
+					model.playPlaylist();
 					view.updatePlayingTrack(selectedTrack);
 					view.setDisplayedPlaylist(model.getPlaylist());
 				}
