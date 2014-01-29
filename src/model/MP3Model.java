@@ -205,7 +205,6 @@ public class MP3Model extends Observable {
 		}
 	}
 
-	//TODO NEXT: Implement this
 	/**
 	 * Checks if there is a previous song in the playlist, if there is then plays it
 	 */

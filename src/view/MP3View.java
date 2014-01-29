@@ -24,7 +24,6 @@ import controller.MP3Controller;
 /**
  * Displays the MP3 player user interface.
  * @author Charlie
- *
  */
 @SuppressWarnings("serial")
 public class MP3View extends JFrame {
@@ -33,15 +32,15 @@ public class MP3View extends JFrame {
 	private MiddlePanel middlePanel;
 	private BottomPanel bottomPanel;
 	private JFileChooser fileChooser;
-	private ProgressDialog progressDialog; 
-	
+	private ProgressDialog progressDialog;
+
 	public MP3View() {
 		super("MP3 Player");
 		setExtendedState(JFrame.MAXIMIZED_BOTH);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		init();
 	}
-	
+
 	private void init() {
 		topPanel = new TopPanel();
 		topPanel.setTopPanelListener(new TopPanelListener() {
@@ -57,10 +56,10 @@ public class MP3View extends JFrame {
 			}
 		});
 		add(topPanel, BorderLayout.NORTH);
-		
+
 		middlePanel = new MiddlePanel();
 		add(middlePanel, BorderLayout.CENTER);
-		
+
 		bottomPanel = new BottomPanel();
 		add(bottomPanel, BorderLayout.SOUTH);
 	}
@@ -68,25 +67,28 @@ public class MP3View extends JFrame {
 	public void addWindowChangeListener(WindowListener listener) {
 		addWindowListener(listener);
 	}
-	
+
 	public void addActionListener(ActionListener listener) {
 		topPanel.addActionListener(listener);
 		bottomPanel.addActionListener(listener);
 	}
-	
+
+	public void addPopupMenuListener(ActionListener listener) {
+		middlePanel.addActionListener(listener);
+	}
 	public void addMouseListener(MouseListener listener) {
 		middlePanel.addMouseListener(listener);
 		topPanel.addMouseListener(listener);
 	}
-	
+
 	public void addListListener(ListSelectionListener listener) {
 		middlePanel.addListListener(listener);
 	}
-	
+
 	public void addVolumeChangeListener(ChangeListener listener) {
 		topPanel.addVolumeChangeListener(listener);
 	}
-	
+
 	/**
 	 * @param tableTracks the tableTracks to set
 	 */
@@ -97,42 +99,42 @@ public class MP3View extends JFrame {
 	public void setController(MP3Controller controller) {
 		this.controller = controller;
 	}
-	
+
 	public void updatePlayingTrack(TrackBean track) {
 		topPanel.updatePlayingTrack(track);
 		middlePanel.updatePlaylist(track);
 	}
-	
+
 	public void stopPlayingTrack() {
 		topPanel.stopPlayingTrack();
 	}
-	
+
 	public File[] showJFileChooser() {
 		fileChooser = new JFileChooser(new File("C:/Users/Charlie/Desktop"));
 		fileChooser.addChoosableFileFilter(new FileFilter() {
 
-	        @Override
-	        public boolean accept(File f) {
-	            return f.getName().endsWith(".mp3");
-	        }
+			@Override
+			public boolean accept(File f) {
+				return f.getName().endsWith(".mp3");
+			}
 
-	        @Override
-	        public String getDescription() {
-	            return "MP3 files";
-	        }
-	    });
+			@Override
+			public String getDescription() {
+				return "MP3 files";
+			}
+		});
 		fileChooser.setDialogTitle("Select music to add");
 		fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
 		fileChooser.setMultiSelectionEnabled(true);
-		
+
 		int returnVal = fileChooser.showOpenDialog(this);
-		
-		if(returnVal == JFileChooser.APPROVE_OPTION) {
+
+		if (returnVal == JFileChooser.APPROVE_OPTION) {
 			return fileChooser.getSelectedFiles();
 		}
 		return null;
 	}
-	
+
 	public void showProgressDialog(int maximumSize, ActionListener listener) {
 		progressDialog = new ProgressDialog(this, maximumSize);
 		progressDialog.addActionListener(listener);
@@ -144,15 +146,15 @@ public class MP3View extends JFrame {
 		});
 		progressDialog.setVisible(true);
 	}
-	
+
 	public void disposeProgressDialog() {
 		progressDialog.disposeDialog();
 	}
-	
+
 	public void updateArtists(List<ArtistBean> artists) {
 		middlePanel.updateArtists(artists);
 	}
-	
+
 	public void displayErrorMessage(String errorMessage) {
 		JOptionPane.showMessageDialog(this, errorMessage, "Error", JOptionPane.ERROR_MESSAGE);
 	}
@@ -164,13 +166,17 @@ public class MP3View extends JFrame {
 	public void changeDisplayedArtist(ArtistBean artist) {
 		middlePanel.changeDisplayedAlbums(artist.getAlbums());
 	}
-	
+
 	public void displayAllAlbums(List<AlbumBean> albums) {
 		middlePanel.changeDisplayedAlbums(albums);
 	}
 
 	public void setDisplayedPlaylist(List<TrackBean> playlist) {
 		middlePanel.setDisplayedPlaylist(playlist);
+	}
+
+	public void showPopupMenu(Object component, int x, int y) {
+		middlePanel.showPopupMenu(component, x, y);
 	}
 	
 	public AlbumBean getSelectedAlbum() {

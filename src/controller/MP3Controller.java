@@ -15,9 +15,11 @@ import javafx.util.Duration;
 
 import javax.swing.JButton;
 import javax.swing.JList;
+import javax.swing.JMenuItem;
 import javax.swing.JProgressBar;
 import javax.swing.JSlider;
 import javax.swing.JTable;
+import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
@@ -46,13 +48,10 @@ public class MP3Controller implements Observer {
 		this.view.addMouseListener(new MouseListener());
 		this.view.addListListener(new ListListener());
 		this.view.addVolumeChangeListener(new VolumeChangeListener());
+		this.view.addPopupMenuListener(new PopupMenuListener());
 		this.model = model;
 		this.model.addObserver(this);
 
-	}
-
-	public TrackBean getTrack(int trackNo) {
-		return model.getTrack(trackNo);
 	}
 
 	public Duration getCurrentTrackTime() {
@@ -144,24 +143,30 @@ public class MP3Controller implements Observer {
 		}
 	}
 
+	private class PopupMenuListener implements ActionListener {
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			JMenuItem popup = (JMenuItem) e.getSource();
+			String name = popup.getName();
+			
+			switch(name) {
+			case "Add Track":
+				System.out.println("Adding track to the playlist...");
+				// TODO NEXT: Need to add functionality for adding to existing playlist and new playlist 
+				break;
+			}
+		}
+	}
+	
 	private class MouseListener extends MouseAdapter {
+		private Object source;
+
 		@Override
 		public void mouseClicked(MouseEvent e) {
-			Object source = e.getSource();
+			source = e.getSource();
 
 			if (source instanceof JTable) {
-				model.setAlbum(view.getSelectedAlbum());
-				JTable table = (JTable) source;
-				int selectedRow = table.getSelectedRow();
-				TrackBean selectedTrack = getTrack(selectedRow);
-
-				if (e.getClickCount() == 2) {
-					model.stopSong(true, selectedTrack);
-					model.addAlbumToPlaylist(selectedTrack);
-					model.playPlaylist();
-					view.updatePlayingTrack(selectedTrack);
-					view.setDisplayedPlaylist(model.getPlaylist());
-				}
+				tableClicked(e);
 			} else if (source instanceof JProgressBar) {
 				JProgressBar progressBar = (JProgressBar) source;
 
@@ -173,6 +178,31 @@ public class MP3Controller implements Observer {
 				int percentage = (int) (progressBarVal * value);
 
 				model.setTrackPercentagePlayed(percentage);
+			}
+		}
+
+		private void tableClicked(MouseEvent e) {
+			JTable table = (JTable) source;
+			
+			if (SwingUtilities.isRightMouseButton(e) || e.isPopupTrigger()) {
+				int row = table.rowAtPoint(e.getPoint());
+				table.changeSelection(row, 0, false, false);
+				view.showPopupMenu(table, e.getX(), e.getY());
+			} else {
+				model.setAlbum(view.getSelectedAlbum());
+				int selectedRow = table.getSelectedRow();
+
+				if (selectedRow >= 0) {
+					TrackBean selectedTrack = model.getTrack(selectedRow);
+
+					if (e.getClickCount() == 2) {
+						model.stopSong(true, selectedTrack);
+						model.addAlbumToPlaylist(selectedTrack);
+						model.playPlaylist();
+						view.updatePlayingTrack(selectedTrack);
+						view.setDisplayedPlaylist(model.getPlaylist());
+					}
+				}
 			}
 		}
 	}
@@ -190,16 +220,16 @@ public class MP3Controller implements Observer {
 
 				// Check the type of the selected object
 				if (selected instanceof ArtistBean) {
-					if(selected instanceof AllArtistsBean) {
+					if (selected instanceof AllArtistsBean) {
 						// Display all the albums
 						view.displayAllAlbums(model.getAllAlbums());
 					} else {
 						ArtistBean artist = (ArtistBean) selected;
-						
+
 						// Update the album list to reflect the change of artist
 						view.changeDisplayedArtist(artist);
 					}
-					
+
 				} else if (selected != null) {
 					AlbumBean album = (AlbumBean) selected;
 
