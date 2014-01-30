@@ -11,7 +11,6 @@ import java.util.List;
  */
 public class ArtistBean implements Serializable {
 	private static final long serialVersionUID = -8571623797558533992L;
-	// TODO NEXT B: In the Artists/Albums list create an All option
 	private String name;
 	// The albums the artist has
 	private List<AlbumBean> albums;

@@ -1,6 +1,7 @@
 package view;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionListener;
@@ -22,6 +23,7 @@ import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.TableCellRenderer;
 
 import model.AlbumBean;
 import model.ArtistBean;
@@ -171,6 +173,17 @@ public class MiddlePanel extends JPanel {
 		return albumsList.getSelectedValue();
 	}
 
+	public List<TrackBean> getSelectedTracks() {
+		int[] selectedRows = tracksTable.getSelectedRows();
+		List<TrackBean> selectedTracks = new ArrayList<>();
+
+		for (int i : selectedRows) {
+			selectedTracks.add(tableTracks.get(i));
+		}
+
+		return selectedTracks;
+	}
+
 	public void showPopupMenu(Object component, int x, int y) {
 		if (component == tracksTable) {
 			tracksTablePopup.show(tracksTable, x, y);
@@ -225,7 +238,6 @@ public class MiddlePanel extends JPanel {
 	 * @author Charlie
 	 */
 	private class PlaylistPanel extends JPanel {
-		//TODO NEXT: Add more functionality for this - custom playlists
 		private JTable playlistTable;
 		private List<TrackBean> displayedTracks;
 		private AbstractTableModel playlistTableModel;
@@ -243,7 +255,21 @@ public class MiddlePanel extends JPanel {
 			JLabel upNextLabel = new JLabel("Playlist:");
 			add(upNextLabel, BorderLayout.NORTH);
 
-			playlistTable = new JTable();
+			playlistTable = new JTable() {
+				@Override
+				public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
+					Component c = super.prepareRenderer(renderer, row, column);
+					
+					int modelRow = convertRowIndexToModel(row);
+					
+					if(modelRow == 0) {
+						c.setForeground(Color.RED);
+					} else {
+						c.setForeground(Color.BLACK);
+					}
+					return c;
+				}
+			};
 			playlistTableModel = new AbstractTableModel() {
 				@Override
 				public Object getValueAt(int rowIndex, int columnIndex) {
@@ -275,7 +301,16 @@ public class MiddlePanel extends JPanel {
 		}
 
 		public void updatePlaylist(TrackBean track) {
-			displayedTracks.remove(track);
+			if (!displayedTracks.isEmpty()) {
+				// Checks which way we are moving through the playlist and adjusts what the table displays as necessary
+				if(displayedTracks.size() == 1) {
+					displayedTracks.remove(0);
+				} else if (displayedTracks.get(1).equals(track)) {
+					displayedTracks.remove(0);
+				} else if(!displayedTracks.get(0).equals(track)){
+					displayedTracks.add(0, track);
+				}
+			}
 			playlistTableModel.fireTableDataChanged();
 		}
 	}

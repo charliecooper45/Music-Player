@@ -7,6 +7,9 @@ import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
@@ -93,7 +96,6 @@ public class MP3Controller implements Observer {
 				switch (buttonName) {
 				case "backward":
 					model.playPreviousSong();
-					view.setDisplayedPlaylist(model.getPlaylist());
 					break;
 				case "play":
 					if (model.getState() == model.getPausedState()) {
@@ -138,6 +140,12 @@ public class MP3Controller implements Observer {
 					model.mute();
 					view.changeMuteIcon();
 					break;
+				case "shuffle":
+					model.shuffle();
+					view.setShuffle(model.isShuffled());
+					// After the shuffle the playlist will have changed so update the view
+					view.setDisplayedPlaylist(model.getPlaylist());
+					break;
 				}
 			}
 		}
@@ -151,8 +159,10 @@ public class MP3Controller implements Observer {
 			
 			switch(name) {
 			case "Add Track":
-				System.out.println("Adding track to the playlist...");
-				// TODO NEXT: Need to add functionality for adding to existing playlist and new playlist 
+				List<TrackBean> selectedTracks = view.getSelectedTracks();
+				model.addTracksToPlaylist(selectedTracks);
+				view.setDisplayedPlaylist(model.getPlaylist());
+				// TODO NEXT: Need to add functionality for adding to existing playlist and new playlist, right click -> clear playlist
 				break;
 			}
 		}
@@ -182,11 +192,26 @@ public class MP3Controller implements Observer {
 		}
 
 		private void tableClicked(MouseEvent e) {
+			boolean isSelected = false;
 			JTable table = (JTable) source;
 			
 			if (SwingUtilities.isRightMouseButton(e) || e.isPopupTrigger()) {
 				int row = table.rowAtPoint(e.getPoint());
-				table.changeSelection(row, 0, false, false);
+				
+				int[] rows = table.getSelectedRows();
+				
+				for(int i = 0; i < rows.length; i++) {
+					if(rows[i] == row) {
+						isSelected = true;
+						break;
+					}
+				}
+				
+				if(!isSelected) {
+					// The row that has been clicked on was not previously selected so select it
+					table.changeSelection(row, 0, false, false);
+				}
+				
 				view.showPopupMenu(table, e.getX(), e.getY());
 			} else {
 				model.setAlbum(view.getSelectedAlbum());

@@ -40,6 +40,7 @@ public class MP3Model extends Observable {
 	private volatile List<ArtistBean> artists;
 	private MediaPlayer player;
 	private boolean playerMuted = false;
+	private boolean shuffle = false;
 	private double volume = 0.5;
 	// State pattern
 	private State state;
@@ -70,7 +71,8 @@ public class MP3Model extends Observable {
 	 * @return the songs remaining to be played in the current album or playlist
 	 */
 	public List<TrackBean> getPlaylist() {
-		return playlist.subList(currentTrackNumber + 1, playlist.size());
+		return playlist;
+		//return playlist.subList(currentTrackNumber + 1, playlist.size());
 	}
 
 	public TrackBean getTrack(int trackNumber) {
@@ -172,6 +174,10 @@ public class MP3Model extends Observable {
 		playlist = currentAlbum.getTracks(track);
 	}
 
+	public void addTracksToPlaylist(List<TrackBean> tracks) {
+		playlist.addAll(tracks);
+	}
+	
 	//TODO NEXT B: Document
 	private void playSong(TrackBean track) {
 		state.playSong(track);
@@ -233,6 +239,18 @@ public class MP3Model extends Observable {
 		}
 	}
 
+	public void shuffle() {
+		shuffle = !shuffle;
+		
+		//TODO NEXT: Implement code to shuffle the playlist
+		if(!playlist.isEmpty() && shuffle) {
+			TrackBean firstTrack = playlist.get(0);
+			playlist.remove(firstTrack);
+			Collections.shuffle(playlist);
+			playlist.add(0, firstTrack);
+		}
+	}
+	
 	public void mute() {
 		playerMuted = !playerMuted;
 
@@ -368,6 +386,10 @@ public class MP3Model extends Observable {
 		this.player = player;
 	}
 
+	public boolean isShuffled() {
+		return shuffle;
+	}
+	
 	public void startProcessFilesThread(final File... files) {
 		future = executor.submit(new ProcessFilesThread(files));
 	}

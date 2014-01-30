@@ -11,6 +11,7 @@ import java.util.List;
 
 import javafx.util.Duration;
 
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -37,6 +38,9 @@ public class TopPanel extends JPanel {
 	private TopPanelListener topPanelListener;
 	private boolean muted = false;
 	//TODO NEXT: Top panel is resizing dynamically, need to prevent this
+	// The icons for shuffling
+	private ImageIcon notShuffledIcon;
+	private ImageIcon shuffledIcon;
 
 	public TopPanel() {
 		setLayout(new GridBagLayout());
@@ -106,6 +110,12 @@ public class TopPanel extends JPanel {
 				controlButtons[i].setName("mute");
 				controlButtons[i].setIcon(Utils.createIcon("/view/resources/images/muteicon.png"));
 				break;
+			case 6:
+				controlButtons[i].setName("shuffle");
+				notShuffledIcon = Utils.createIcon("/view/resources/images/shuffleofficon.png");
+				shuffledIcon = Utils.createIcon("/view/resources/images/shuffleonicon.png");
+				controlButtons[i].setIcon(notShuffledIcon);
+				break;
 			}
 		}
 		Utils.setGBC(gc, 1, 4, 1, 1, GridBagConstraints.BOTH);
@@ -122,6 +132,11 @@ public class TopPanel extends JPanel {
 		} else {
 			controlButtons[5].setIcon(Utils.createIcon("/view/resources/images/muteicon.png"));
 		}
+	}
+	
+	public void changeShuffleIcon(boolean shuffle) {
+		ImageIcon icon = (shuffle) ? shuffledIcon : notShuffledIcon;
+		controlButtons[6].setIcon(icon);
 	}
 	
 	/**
@@ -165,6 +180,7 @@ public class TopPanel extends JPanel {
 		// Alert the main view class that the track has finished playing
 		topPanelListener.trackFinished();
 	}
+	
 	
 	/**
 	 * Adds an ActionListener from the view to the appropriate components

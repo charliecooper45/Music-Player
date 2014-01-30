@@ -76,6 +76,7 @@ public class MP3View extends JFrame {
 	public void addPopupMenuListener(ActionListener listener) {
 		middlePanel.addActionListener(listener);
 	}
+	
 	public void addMouseListener(MouseListener listener) {
 		middlePanel.addMouseListener(listener);
 		topPanel.addMouseListener(listener);
@@ -96,6 +97,10 @@ public class MP3View extends JFrame {
 		middlePanel.setTableTracks(tableTracks);
 	}
 
+	public List<TrackBean> getSelectedTracks() {
+		return middlePanel.getSelectedTracks();
+	}
+	
 	public void setController(MP3Controller controller) {
 		this.controller = controller;
 	}
@@ -107,6 +112,7 @@ public class MP3View extends JFrame {
 
 	public void stopPlayingTrack() {
 		topPanel.stopPlayingTrack();
+		middlePanel.updatePlaylist(null);
 	}
 
 	public File[] showJFileChooser() {
@@ -159,6 +165,10 @@ public class MP3View extends JFrame {
 		JOptionPane.showMessageDialog(this, errorMessage, "Error", JOptionPane.ERROR_MESSAGE);
 	}
 
+	public void setShuffle(boolean shuffle) {
+		topPanel.changeShuffleIcon(shuffle);
+	}
+	
 	public void changeMuteIcon() {
 		topPanel.changeMuteIcon();
 	}
