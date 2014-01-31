@@ -192,4 +192,8 @@ public class MP3View extends JFrame {
 	public AlbumBean getSelectedAlbum() {
 		return middlePanel.getSelectedAlbum();
 	}
+	
+	public int getTrackNumber() {
+		return middlePanel.getTrackNumber();
+	}
 }

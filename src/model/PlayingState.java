@@ -37,5 +37,6 @@ public class PlayingState implements State {
 	public void stopSong() {
 		model.getPlayer().stop();
 		model.setState(model.getInitialState());
+		model.stopSong(false);
 	}
 }

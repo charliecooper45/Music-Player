@@ -71,8 +71,7 @@ public class MP3Model extends Observable {
 	 * @return the songs remaining to be played in the current album or playlist
 	 */
 	public List<TrackBean> getPlaylist() {
-		return playlist;
-		//return playlist.subList(currentTrackNumber + 1, playlist.size());
+		return playlist.subList(currentTrackNumber, playlist.size());
 	}
 
 	public TrackBean getTrack(int trackNumber) {
@@ -156,22 +155,22 @@ public class MP3Model extends Observable {
 	/**
 	 * @param currentAlbum the album that is selected
 	 */
-	public void setAlbum(AlbumBean currentAlbum) {
+	public void setAlbum(AlbumBean currentAlbum, int currentTrackNumber) {
 		this.currentAlbum = currentAlbum;
+		this.currentTrackNumber = currentTrackNumber;
+		
+		playlist = new ArrayList<>(currentAlbum.getTracks());
+		
+		if(shuffle) {
+			shuffle();
+		}
 	}
 	
 	/** 
 	 * Starts playing the current playlist from the first track
 	 */
 	public void playPlaylist() {
-		currentTrackNumber = 0;
-		
 		playSong(playlist.get(currentTrackNumber));
-	}
-
-	public void addAlbumToPlaylist(TrackBean track) {
-		// Set the playlist to the songs in the album
-		playlist = currentAlbum.getTracks(track);
 	}
 
 	public void addTracksToPlaylist(List<TrackBean> tracks) {
@@ -182,6 +181,9 @@ public class MP3Model extends Observable {
 	private void playSong(TrackBean track) {
 		state.playSong(track);
 		player.setMute(playerMuted);
+		
+		setChanged();
+		notifyObservers(track);
 	}
 
 	/**
@@ -191,7 +193,6 @@ public class MP3Model extends Observable {
 		TrackBean newTrack = null;
 
 		if (state != initialState) {
-			//TODO NEXT: test playing an album, also test with different states
 			//TODO NEXT: The playlist list needs to be cleared at some point -> clear playlist button and when playing a new album
 			if (currentTrackNumber < playlist.size() - 1) {
 				currentTrackNumber++;
@@ -204,10 +205,10 @@ public class MP3Model extends Observable {
 			} else {
 				System.out.println("The album is finished");
 				state.stopSong();
-			}
-
-			setChanged();
-			notifyObservers(newTrack);
+				
+				setChanged();
+				notifyObservers(null);
+			} 
 		}
 	}
 
@@ -233,22 +234,40 @@ public class MP3Model extends Observable {
 			TrackBean newTrack = playlist.get(currentTrackNumber);
 
 			playSong(newTrack);
-
-			setChanged();
-			notifyObservers(newTrack);
 		}
 	}
 
-	public void shuffle() {
-		shuffle = !shuffle;
-		
-		//TODO NEXT: Implement code to shuffle the playlist
-		if(!playlist.isEmpty() && shuffle) {
-			TrackBean firstTrack = playlist.get(0);
-			playlist.remove(firstTrack);
-			Collections.shuffle(playlist);
-			playlist.add(0, firstTrack);
+	public void play() {
+		if (state == pausedState) {
+			resumeSong();
+		} else {
+			if(!playlist.isEmpty()) {
+				playPlaylist();
+				
+				System.out.println(playlist.size());
+				
+				setChanged();
+				notifyObservers(playlist.get(currentTrackNumber));
+			}
 		}
+	}
+	
+	public void shuffle() {
+		//TODO NEXT: Implement code to shuffle the playlist - shuffling when playing an album is not working correctly ATM
+		if(!playlist.isEmpty()) {
+			TrackBean firstTrack = playlist.remove(0);
+
+			Collections.shuffle(playlist);
+			
+			playlist.add(0, firstTrack);
+		} 
+	}
+	
+	private void clearPlaylist() {
+		// Called when a playlist is finished
+		playlist.clear();
+		currentTrackNumber = 0;
+		currentAlbum = null;
 	}
 	
 	public void mute() {
@@ -267,14 +286,17 @@ public class MP3Model extends Observable {
 		state.resumeSong();
 	}
 
-	public void stopSong(boolean playAnotherSong, TrackBean newTrack) {
-		if (player != null)
+	public void stopSong(boolean playAnotherSong) {
+		if (player != null) {
 			state.stopSong();
-
+		}
+		
 		// Check to see if the user is ceasing to play any songs
 		if (!playAnotherSong) {
 			state = initialState;
 		}
+		
+		clearPlaylist();
 	}
 
 	/**
@@ -388,6 +410,10 @@ public class MP3Model extends Observable {
 
 	public boolean isShuffled() {
 		return shuffle;
+	}
+	
+	public void setShuffled(boolean shuffle) {
+		this.shuffle = shuffle;
 	}
 	
 	public void startProcessFilesThread(final File... files) {

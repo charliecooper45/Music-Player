@@ -173,6 +173,10 @@ public class MiddlePanel extends JPanel {
 		return albumsList.getSelectedValue();
 	}
 
+	public int getTrackNumber() {
+		return tracksTable.getSelectedRow();
+	}
+	
 	public List<TrackBean> getSelectedTracks() {
 		int[] selectedRows = tracksTable.getSelectedRows();
 		List<TrackBean> selectedTracks = new ArrayList<>();
@@ -301,16 +305,19 @@ public class MiddlePanel extends JPanel {
 		}
 
 		public void updatePlaylist(TrackBean track) {
-			if (!displayedTracks.isEmpty()) {
+			if (track == null) {
+				// The playlist is finished so clear it
+				displayedTracks.clear();
+			} else if (!displayedTracks.isEmpty()) {
 				// Checks which way we are moving through the playlist and adjusts what the table displays as necessary
-				if(displayedTracks.size() == 1) {
-					displayedTracks.remove(0);
-				} else if (displayedTracks.get(1).equals(track)) {
-					displayedTracks.remove(0);
-				} else if(!displayedTracks.get(0).equals(track)){
-					displayedTracks.add(0, track);
+				if(displayedTracks.size() != 1) {
+					if (displayedTracks.get(1).equals(track)) {
+						displayedTracks.remove(0);
+					} else if(!displayedTracks.get(0).equals(track)){
+						displayedTracks.add(0, track);
+					}
 				}
-			}
+			} 
 			playlistTableModel.fireTableDataChanged();
 		}
 	}

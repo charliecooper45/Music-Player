@@ -98,15 +98,13 @@ public class MP3Controller implements Observer {
 					model.playPreviousSong();
 					break;
 				case "play":
-					if (model.getState() == model.getPausedState()) {
-						model.resumeSong();
-					}
+					model.play();
 					break;
 				case "pause":
 					model.pauseSong();
 					break;
 				case "stop":
-					model.stopSong(false, null);
+					model.stopSong(false);
 					view.stopPlayingTrack();
 					break;
 				case "forward":
@@ -141,8 +139,9 @@ public class MP3Controller implements Observer {
 					view.changeMuteIcon();
 					break;
 				case "shuffle":
-					model.shuffle();
-					view.setShuffle(model.isShuffled());
+					boolean shuffled = !model.isShuffled();
+					model.setShuffled(shuffled);
+					view.setShuffle(shuffled);
 					// After the shuffle the playlist will have changed so update the view
 					view.setDisplayedPlaylist(model.getPlaylist());
 					break;
@@ -158,6 +157,7 @@ public class MP3Controller implements Observer {
 			String name = popup.getName();
 			
 			switch(name) {
+			//TODO NEXT B: change this to lowercase
 			case "Add Track":
 				List<TrackBean> selectedTracks = view.getSelectedTracks();
 				model.addTracksToPlaylist(selectedTracks);
@@ -214,17 +214,14 @@ public class MP3Controller implements Observer {
 				
 				view.showPopupMenu(table, e.getX(), e.getY());
 			} else {
-				model.setAlbum(view.getSelectedAlbum());
 				int selectedRow = table.getSelectedRow();
 
 				if (selectedRow >= 0) {
-					TrackBean selectedTrack = model.getTrack(selectedRow);
 
 					if (e.getClickCount() == 2) {
-						model.stopSong(true, selectedTrack);
-						model.addAlbumToPlaylist(selectedTrack);
+						model.stopSong(true);
+						model.setAlbum(view.getSelectedAlbum(), view.getTrackNumber());
 						model.playPlaylist();
-						view.updatePlayingTrack(selectedTrack);
 						view.setDisplayedPlaylist(model.getPlaylist());
 					}
 				}

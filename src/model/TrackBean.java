@@ -9,7 +9,7 @@ import javafx.util.Duration;
  * Represents a single track.
  * @author Charlie
  */
-public class TrackBean implements Serializable {
+public class TrackBean implements Serializable{
 	private static final long serialVersionUID = 7863985297307469985L;
 	private URI location;
 	private String artist;
@@ -135,7 +135,7 @@ public class TrackBean implements Serializable {
 	public void setGenre(String genre) {
 		this.genre = genre;
 	}
-
+	
 	/**
 	 * Class that allow the track duration to be serialized.
 	 * @author Charlie
