@@ -41,6 +41,8 @@ public class TopPanel extends JPanel {
 	// The icons for shuffling
 	private ImageIcon notShuffledIcon;
 	private ImageIcon shuffledIcon;
+	private ImageIcon notLoopingIcon;
+	private ImageIcon loopingIcon;
 
 	public TopPanel() {
 		setLayout(new GridBagLayout());
@@ -116,6 +118,12 @@ public class TopPanel extends JPanel {
 				shuffledIcon = Utils.createIcon("/view/resources/images/shuffleonicon.png");
 				controlButtons[i].setIcon(notShuffledIcon);
 				break;
+			case 7:
+				controlButtons[i].setName("loop");
+				notLoopingIcon = Utils.createIcon("/view/resources/images/loopofficon.png");
+				loopingIcon = Utils.createIcon("/view/resources/images/looponicon.png");
+				controlButtons[i].setIcon(notLoopingIcon);
+				break;
 			}
 		}
 		Utils.setGBC(gc, 1, 4, 1, 1, GridBagConstraints.BOTH);
@@ -137,6 +145,11 @@ public class TopPanel extends JPanel {
 	public void changeShuffleIcon(boolean shuffle) {
 		ImageIcon icon = (shuffle) ? shuffledIcon : notShuffledIcon;
 		controlButtons[6].setIcon(icon);
+	}
+	
+	public void changeLoopIcon(boolean loop) {
+		ImageIcon icon = (loop) ? loopingIcon : notLoopingIcon;
+		controlButtons[7].setIcon(icon);
 	}
 	
 	/**
@@ -180,7 +193,6 @@ public class TopPanel extends JPanel {
 		// Alert the main view class that the track has finished playing
 		topPanelListener.trackFinished();
 	}
-	
 	
 	/**
 	 * Adds an ActionListener from the view to the appropriate components

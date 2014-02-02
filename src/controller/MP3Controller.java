@@ -7,9 +7,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
@@ -73,12 +70,19 @@ public class MP3Controller implements Observer {
 	public void update(Observable o, Object arg) {
 		if (o instanceof MP3Model) {
 			if (arg instanceof List) {
-				view.updateArtists(model.getArtists());
+				List<?> list = (List<?>) arg;
+				if(list.get(0).getClass().equals(TrackBean.class)) {
+					// If the list is full of tracks then we need to update the playlist
+					view.setDisplayedPlaylist(model.getPlaylist());
+				} else {
+					// Update the displayed artists
+					view.updateArtists(model.getArtists());
+				}
 			} else if (arg instanceof TrackBean) {
 				view.updatePlayingTrack((TrackBean) arg);
 			} else if (arg == null) {
 				view.stopPlayingTrack();
-			}
+			} 
 		}
 	}
 
@@ -145,6 +149,11 @@ public class MP3Controller implements Observer {
 					// After the shuffle the playlist will have changed so update the view
 					view.setDisplayedPlaylist(model.getPlaylist());
 					break;
+				case "loop":
+					boolean looped = !model.isLooped();
+					model.setLooped(looped);
+					view.setLooped(looped);
+					break;
 				}
 			}
 		}
@@ -157,12 +166,20 @@ public class MP3Controller implements Observer {
 			String name = popup.getName();
 			
 			switch(name) {
-			//TODO NEXT B: change this to lowercase
-			case "Add Track":
+			case "add track":
 				List<TrackBean> selectedTracks = view.getSelectedTracks();
 				model.addTracksToPlaylist(selectedTracks);
 				view.setDisplayedPlaylist(model.getPlaylist());
 				// TODO NEXT: Need to add functionality for adding to existing playlist and new playlist, right click -> clear playlist
+				break;
+			case "add album":
+				AlbumBean selectedAlbum = view.getSelectedAlbum();
+				model.addTracksToPlaylist(selectedAlbum.getTracks());
+				view.setDisplayedPlaylist(model.getPlaylist());
+				break;
+			case "clear playlist":
+				model.stopSong(false);
+				view.setDisplayedPlaylist(model.getPlaylist());
 				break;
 			}
 		}

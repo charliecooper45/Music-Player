@@ -75,9 +75,15 @@ public class MiddlePanel extends JPanel {
 
 		tracksTablePopup = new JPopupMenu();
 		JMenuItem addTrack = new JMenuItem("Add to playlist");
-		addTrack.setName("Add Track");
+		addTrack.setName("add track");
+		JMenuItem addAlbum = new JMenuItem("Add album to playlist");
+		addAlbum.setName("add album");
+		JMenuItem clearPlaylist = new JMenuItem("Clear playlist");
+		clearPlaylist.setName("clear playlist");
 		tracksTablePopup.add(addTrack);
-		tracksTablePopup.setPreferredSize(new Dimension(200, 30));
+		tracksTablePopup.add(addAlbum);
+		tracksTablePopup.add(clearPlaylist);
+		tracksTablePopup.setPreferredSize(new Dimension(200, 75));
 	}
 
 	private void setupListsPanel() {

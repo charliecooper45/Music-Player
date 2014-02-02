@@ -169,6 +169,10 @@ public class MP3View extends JFrame {
 		topPanel.changeShuffleIcon(shuffle);
 	}
 	
+	public void setLooped(boolean looped) {
+		topPanel.changeLoopIcon(looped);
+	}
+	
 	public void changeMuteIcon() {
 		topPanel.changeMuteIcon();
 	}
