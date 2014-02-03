@@ -44,6 +44,15 @@ public class ArtistBean implements Serializable {
 		album.addTrack(track);
 	}
 
+	public boolean removeAlbum(AlbumBean album) {
+		albums.remove(album);
+		
+		if(albums.isEmpty()) {
+			return true;
+		}
+		return false;
+	}
+	
 	/**
 	 * @return the name
 	 */

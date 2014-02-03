@@ -11,9 +11,11 @@ import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListModel;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
@@ -80,10 +82,14 @@ public class MiddlePanel extends JPanel {
 		addAlbum.setName("add album");
 		JMenuItem clearPlaylist = new JMenuItem("Clear playlist");
 		clearPlaylist.setName("clear playlist");
+		JMenuItem removeTrack = new JMenuItem("Remove from library");
+		removeTrack.setName("remove track");
 		tracksTablePopup.add(addTrack);
 		tracksTablePopup.add(addAlbum);
 		tracksTablePopup.add(clearPlaylist);
-		tracksTablePopup.setPreferredSize(new Dimension(200, 75));
+		tracksTablePopup.addSeparator();
+		tracksTablePopup.add(removeTrack);
+		tracksTablePopup.setPreferredSize(new Dimension(200, 85));
 	}
 
 	private void setupListsPanel() {
@@ -138,7 +144,7 @@ public class MiddlePanel extends JPanel {
 			artistsListModel.addElement(artist);
 		}
 
-		if (selectedArtist != null) {
+		if (selectedArtist != null && artists.contains(selectedArtist)) {
 			artistsList.setSelectedValue(selectedArtist, true);
 		} else {
 			artistsList.setSelectedIndex(0);
@@ -146,13 +152,19 @@ public class MiddlePanel extends JPanel {
 	}
 
 	public void changeDisplayedAlbums(List<AlbumBean> albums) {
+		AlbumBean selectedAlbum = albumsList.getSelectedValue();
+		
 		albumsListModel.clear();
 
 		for (AlbumBean album : albums) {
 			albumsListModel.addElement(album);
 		}
 
-		albumsList.setSelectedIndex(0);
+		if(albumsListModel.contains(selectedAlbum)) {
+			albumsList.setSelectedValue(selectedAlbum, true);
+		} else {
+			albumsList.setSelectedIndex(0);
+		}
 	}
 
 	public void setDisplayedPlaylist(List<TrackBean> playlist) {
@@ -182,7 +194,7 @@ public class MiddlePanel extends JPanel {
 	public int getTrackNumber() {
 		return tracksTable.getSelectedRow();
 	}
-	
+
 	public List<TrackBean> getSelectedTracks() {
 		int[] selectedRows = tracksTable.getSelectedRows();
 		List<TrackBean> selectedTracks = new ArrayList<>();
@@ -194,10 +206,16 @@ public class MiddlePanel extends JPanel {
 		return selectedTracks;
 	}
 
-	public void showPopupMenu(Object component, int x, int y) {
+	public boolean showPopupMenu(Object component, int x, int y) {
 		if (component == tracksTable) {
 			tracksTablePopup.show(tracksTable, x, y);
+		} else {
+			// This is a confirmation popup about deleting a track
+			int confirm = JOptionPane.showConfirmDialog((JFrame) component, "Are you sure you wish to delete the selected tracks?", "Delete confirmation", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+			if (confirm == JOptionPane.YES_OPTION)
+				return true;
 		}
+		return false;
 	}
 
 	private class TracksTableModel extends AbstractTableModel {
@@ -269,10 +287,10 @@ public class MiddlePanel extends JPanel {
 				@Override
 				public Component prepareRenderer(TableCellRenderer renderer, int row, int column) {
 					Component c = super.prepareRenderer(renderer, row, column);
-					
+
 					int modelRow = convertRowIndexToModel(row);
-					
-					if(modelRow == 0) {
+
+					if (modelRow == 0) {
 						c.setForeground(Color.RED);
 					} else {
 						c.setForeground(Color.BLACK);
@@ -316,14 +334,14 @@ public class MiddlePanel extends JPanel {
 				displayedTracks.clear();
 			} else if (!displayedTracks.isEmpty()) {
 				// Checks which way we are moving through the playlist and adjusts what the table displays as necessary
-				if(displayedTracks.size() != 1) {
+				if (displayedTracks.size() != 1) {
 					if (displayedTracks.get(1).equals(track)) {
 						displayedTracks.remove(0);
-					} else if(!displayedTracks.get(0).equals(track)){
+					} else if (!displayedTracks.get(0).equals(track)) {
 						displayedTracks.add(0, track);
 					}
 				}
-			} 
+			}
 			playlistTableModel.fireTableDataChanged();
 		}
 	}

@@ -170,7 +170,6 @@ public class MP3Controller implements Observer {
 				List<TrackBean> selectedTracks = view.getSelectedTracks();
 				model.addTracksToPlaylist(selectedTracks);
 				view.setDisplayedPlaylist(model.getPlaylist());
-				// TODO NEXT: Need to add functionality for adding to existing playlist and new playlist, right click -> clear playlist
 				break;
 			case "add album":
 				AlbumBean selectedAlbum = view.getSelectedAlbum();
@@ -180,6 +179,16 @@ public class MP3Controller implements Observer {
 			case "clear playlist":
 				model.stopSong(false);
 				view.setDisplayedPlaylist(model.getPlaylist());
+				break;
+			case "remove track":
+				List<TrackBean> tracks = view.getSelectedTracks();
+				AlbumBean tracksAlbum = tracks.get(0).getAlbum();
+				
+				boolean delete = view.showPopupMenu(view, -1, -1);
+				if(delete)
+					model.deleteTracks(tracks);
+				view.setTableTracks(tracksAlbum.getTracks());
+				view.updateArtists(model.getArtists());
 				break;
 			}
 		}

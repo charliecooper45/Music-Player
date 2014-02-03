@@ -159,14 +159,14 @@ public class MP3Model extends Observable {
 	public void setAlbum(AlbumBean currentAlbum, int currentTrackNumber) {
 		this.currentAlbum = currentAlbum;
 		this.currentTrackNumber = currentTrackNumber;
-		
+
 		playlist = new ArrayList<>(currentAlbum.getTracks());
-		
-		if(shuffle) {
+
+		if (shuffle) {
 			shuffle(true);
 		}
 	}
-	
+
 	/** 
 	 * Starts playing the current playlist from the first track
 	 */
@@ -176,17 +176,17 @@ public class MP3Model extends Observable {
 
 	public void addTracksToPlaylist(List<TrackBean> tracks) {
 		playlist.addAll(tracks);
-		
-		if(shuffle) {
+
+		if (shuffle) {
 			shuffle(false);
 		}
 	}
-	
+
 	//TODO NEXT B: Document
 	private void playSong(TrackBean track) {
 		state.playSong(track);
 		player.setMute(playerMuted);
-		
+
 		setChanged();
 		notifyObservers(track);
 	}
@@ -204,23 +204,23 @@ public class MP3Model extends Observable {
 				if (player != null)
 					player.stop();
 
-				if(loop) {
+				if (loop) {
 					// If looping add the song we just played to the playlist
 					playlist.add(playlist.get(currentTrackNumber - 1));
-					
+
 					setChanged();
 					notifyObservers(playlist);
 				}
-				
+
 				newTrack = playlist.get(currentTrackNumber);
 				playSong(newTrack);
 			} else {
 				System.out.println("The album is finished");
 				state.stopSong();
-				
+
 				setChanged();
 				notifyObservers(null);
-			} 
+			}
 		}
 	}
 
@@ -248,35 +248,35 @@ public class MP3Model extends Observable {
 		if (state == pausedState) {
 			resumeSong();
 		} else {
-			if(!playlist.isEmpty()) {
+			if (!playlist.isEmpty()) {
 				playPlaylist();
-				
+
 				setChanged();
 				notifyObservers(playlist.get(currentTrackNumber));
 			}
 		}
 	}
-	
+
 	public void shuffle(boolean firstTrackSelected) {
 		//TODO NEXT: Implement code to shuffle the playlist - shuffling when playing an album is not working correctly ATM
-		if(!playlist.isEmpty()) {
-			if(firstTrackSelected) {
+		if (!playlist.isEmpty()) {
+			if (firstTrackSelected) {
 				TrackBean firstTrack = playlist.remove(currentTrackNumber);
 				Collections.shuffle(playlist);
 				playlist.add(currentTrackNumber, firstTrack);
 			} else {
 				Collections.shuffle(playlist);
 			}
-		} 
+		}
 	}
-	
+
 	private void clearPlaylist() {
 		// Called when a playlist is finished
 		playlist.clear();
 		currentTrackNumber = 0;
 		currentAlbum = null;
 	}
-	
+
 	public void mute() {
 		playerMuted = !playerMuted;
 
@@ -297,13 +297,41 @@ public class MP3Model extends Observable {
 		if (player != null) {
 			state.stopSong();
 		}
-		
+
 		// Check to see if the user is ceasing to play any songs
 		if (!playAnotherSong) {
 			state = initialState;
 		}
-		
+
 		clearPlaylist();
+	}
+
+	public void deleteTracks(List<TrackBean> tracks) {
+		String artistName = tracks.get(0).getArtist();
+		AlbumBean album = tracks.get(0).getAlbum();
+
+		boolean albumEmpty = album.deleteTracks(tracks);
+
+		if (albumEmpty) {
+			for (ArtistBean artist : artists) {
+				if (artist.getName().equals(artistName)) {
+					boolean artistEmpty = artist.removeAlbum(album);
+					if (artistEmpty) {
+						// The artist has no more albums so remove it from the database
+						artists.remove(artist);
+					}
+					break;
+				}
+			}
+		}
+		
+		// Check if one of the tracks being deleted is the current track
+		if (tracks.contains(playlist.get(currentTrackNumber))) {
+			stopSong(false);
+			
+			setChanged();
+			notifyObservers(null);
+		}
 	}
 
 	/**
@@ -418,19 +446,19 @@ public class MP3Model extends Observable {
 	public boolean isShuffled() {
 		return shuffle;
 	}
-	
+
 	public boolean isLooped() {
 		return loop;
 	}
-	
+
 	public void setShuffled(boolean shuffle) {
 		this.shuffle = shuffle;
 	}
-	
+
 	public void setLooped(boolean loop) {
 		this.loop = loop;
 	}
-	
+
 	public void startProcessFilesThread(final File... files) {
 		future = executor.submit(new ProcessFilesThread(files));
 	}

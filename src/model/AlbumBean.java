@@ -46,6 +46,16 @@ public class AlbumBean implements Serializable {
 		return tracks.get(trackNumber);
 	}
 	
+	public boolean deleteTracks(List<TrackBean> tracksToRemove) {
+		//TODO NEXT: Tracks should potentially have their own track number stored, this could be read in?
+		tracks.removeAll(tracksToRemove);
+		
+		// Check if all tracks have been deleted from the album
+		if(tracks.isEmpty()) 
+			return true;
+		
+		return false;
+	}
 	
 	/**
 	 * @return the tracks in the album

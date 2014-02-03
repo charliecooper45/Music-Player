@@ -189,8 +189,8 @@ public class MP3View extends JFrame {
 		middlePanel.setDisplayedPlaylist(playlist);
 	}
 
-	public void showPopupMenu(Object component, int x, int y) {
-		middlePanel.showPopupMenu(component, x, y);
+	public boolean showPopupMenu(Object component, int x, int y) {
+		return middlePanel.showPopupMenu(component, x, y);
 	}
 	
 	public AlbumBean getSelectedAlbum() {
