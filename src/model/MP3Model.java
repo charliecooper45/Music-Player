@@ -325,8 +325,8 @@ public class MP3Model extends Observable {
 			}
 		}
 		
-		// Check if one of the tracks being deleted is the current track
-		if (tracks.contains(playlist.get(currentTrackNumber))) {
+		// Check if one of the tracks being deleted is the current track in the playlist
+		if (playlist.size() > 0 && tracks.contains(playlist.get(currentTrackNumber))) {
 			stopSong(false);
 			
 			setChanged();
@@ -530,13 +530,13 @@ public class MP3Model extends Observable {
 		private void createTrack(File file) {
 			numberProcessed = numberProcessed + 1;
 			Mp3File mp3File;
-			String track, artist, title, album, year, genre;
+			String trackNumber, artist, title, album, year, genre;
 			try {
 				mp3File = new Mp3File(file.getAbsolutePath());
 
 				if (mp3File.hasId3v1Tag()) {
 					ID3v1 id3v1Tag = mp3File.getId3v1Tag();
-					track = id3v1Tag.getTrack();
+					trackNumber = id3v1Tag.getTrack();
 					artist = id3v1Tag.getArtist();
 					title = id3v1Tag.getTitle();
 					album = id3v1Tag.getAlbum();
@@ -544,7 +544,7 @@ public class MP3Model extends Observable {
 					genre = id3v1Tag.getGenreDescription();
 				} else if (mp3File.hasId3v2Tag()) {
 					ID3v1 id3v2Tag = mp3File.getId3v2Tag();
-					track = id3v2Tag.getTrack();
+					trackNumber = id3v2Tag.getTrack();
 					artist = id3v2Tag.getArtist();
 					title = id3v2Tag.getTitle();
 					album = id3v2Tag.getAlbum();
@@ -555,15 +555,15 @@ public class MP3Model extends Observable {
 					System.err.println("Cannot read track data");
 					return;
 				}
-
-				addTrackToDatabase(Paths.get(file.toURI()), artist, title, album, mp3File.getLengthInMilliseconds(), genre);
+				
+				addTrackToDatabase(Paths.get(file.toURI()), trackNumber, artist, title, album, mp3File.getLengthInMilliseconds(), genre);
 			} catch (UnsupportedTagException | InvalidDataException | IOException e) {
 				//TODO NEXT B: Produce error to show that the user has deleted a file while it is being processed (check for interrupt)
 				e.printStackTrace();
 			}
 		}
 
-		private void addTrackToDatabase(Path path, String artist, String title, String album, long milliseconds, String genre) {
+		private void addTrackToDatabase(Path path, String trackNumber, String artist, String title, String album, long milliseconds, String genre) {
 			AlbumBean trackAlbum = null;
 			TrackBean trackBean = null;
 			ArtistBean trackArtist = null;
@@ -597,7 +597,7 @@ public class MP3Model extends Observable {
 				trackAlbum = new AlbumBean(album);
 			}
 
-			trackBean = new TrackBean(path.toUri(), artist, title, trackAlbum, new Duration(milliseconds), genre);
+			trackBean = new TrackBean(path.toUri(), trackNumber, artist, title, trackAlbum, new Duration(milliseconds), genre);
 			trackArtist.addTrack(trackBean, trackAlbum);
 		}
 	}

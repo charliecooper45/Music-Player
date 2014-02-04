@@ -1,43 +1,40 @@
 package model;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedList;
 import java.util.List;
 
 public class AlbumBean implements Serializable {
 	private static final long serialVersionUID = 2703233139456179492L;
 	private String title;
 	private List<TrackBean> tracks;
-	
+	private boolean sorted = true;
+
 	public AlbumBean() {
-		tracks = new ArrayList<>();
+		tracks = new LinkedList<>();
 	}
-	
+
 	public AlbumBean(String title) {
 		this();
 		this.title = title;
 	}
-	
+
 	public void addTrack(TrackBean track) {
 		tracks.add(track);
+		sorted = false;
 	}
 	
-	/**
-	 * @return the track number of the given TrackBean or -1
-	 */
-	public int getTrackNumber(TrackBean track) {
-		return tracks.indexOf(track) + 1;
+	private void sortTracks() {
+		Collections.sort(tracks, new Comparator<TrackBean>() {
+			@Override
+			public int compare(TrackBean track1, TrackBean track2) {
+				return track1.getTrackNumber() - track2.getTrackNumber();
+			}
+		});
 	}
-	
-	/**
-	 * @param track in the album
-	 * @return a copy of the collection holding the tracks from the current track onwards
-	 */
-	public List<TrackBean> getTracks(TrackBean track) {
-		return tracks.subList(getTrackNumber(track) - 1, tracks.size());
-	}
-	
+
 	/**
 	 * @param trackNumber
 	 * @return The TrackBean associated with the trackNumber for this album
@@ -45,22 +42,26 @@ public class AlbumBean implements Serializable {
 	public TrackBean getTrack(int trackNumber) {
 		return tracks.get(trackNumber);
 	}
-	
+
 	public boolean deleteTracks(List<TrackBean> tracksToRemove) {
 		//TODO NEXT: Tracks should potentially have their own track number stored, this could be read in?
 		tracks.removeAll(tracksToRemove);
-		
+
 		// Check if all tracks have been deleted from the album
-		if(tracks.isEmpty()) 
+		if (tracks.isEmpty())
 			return true;
-		
+
 		return false;
 	}
-	
+
 	/**
 	 * @return the tracks in the album
 	 */
 	public List<TrackBean> getTracks() {
+		if(!sorted) {
+			sortTracks();
+			sorted = true;
+		}
 		return Collections.unmodifiableList(tracks);
 	}
 

@@ -5,6 +5,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseListener;
 import java.util.ArrayList;
 import java.util.List;
@@ -84,12 +85,16 @@ public class MiddlePanel extends JPanel {
 		clearPlaylist.setName("clear playlist");
 		JMenuItem removeTrack = new JMenuItem("Remove from library");
 		removeTrack.setName("remove track");
+		JMenuItem getTrackInfo = new JMenuItem("Get info");
+		getTrackInfo.setName("get info");
 		tracksTablePopup.add(addTrack);
 		tracksTablePopup.add(addAlbum);
 		tracksTablePopup.add(clearPlaylist);
 		tracksTablePopup.addSeparator();
 		tracksTablePopup.add(removeTrack);
-		tracksTablePopup.setPreferredSize(new Dimension(200, 85));
+		tracksTablePopup.addSeparator();
+		tracksTablePopup.add(getTrackInfo);
+		tracksTablePopup.setPreferredSize(new Dimension(200, 100));
 	}
 
 	private void setupListsPanel() {
@@ -131,6 +136,10 @@ public class MiddlePanel extends JPanel {
 				menuItem.addActionListener(listener);
 			}
 		}
+	}
+
+	public void addKeyListener(KeyListener listener) {
+		tracksTable.addKeyListener(listener);
 	}
 
 	public void updateArtists(List<ArtistBean> artists) {
@@ -242,7 +251,7 @@ public class MiddlePanel extends JPanel {
 
 			switch (columnIndex) {
 			case 0:
-				return track.getAlbum().getTrackNumber(track);
+				return track.getTrackNumber();
 			case 1:
 				return track.getArtist();
 			case 2:

@@ -2,6 +2,8 @@ package controller;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
@@ -49,6 +51,7 @@ public class MP3Controller implements Observer {
 		this.view.addListListener(new ListListener());
 		this.view.addVolumeChangeListener(new VolumeChangeListener());
 		this.view.addPopupMenuListener(new PopupMenuListener());
+		this.view.addKeyListener(new KeyListener());
 		this.model = model;
 		this.model.addObserver(this);
 
@@ -86,6 +89,17 @@ public class MP3Controller implements Observer {
 		}
 	}
 
+	private void removeTracks() {
+		List<TrackBean> tracks = view.getSelectedTracks();
+		AlbumBean tracksAlbum = tracks.get(0).getAlbum();
+		
+		boolean delete = view.showPopupMenu(view, -1, -1);
+		if(delete)
+			model.deleteTracks(tracks);
+		view.setTableTracks(tracksAlbum.getTracks());
+		view.updateArtists(model.getArtists());
+	}
+	
 	// listener classes
 	private class ButtonListener implements ActionListener {
 		@Override
@@ -181,14 +195,10 @@ public class MP3Controller implements Observer {
 				view.setDisplayedPlaylist(model.getPlaylist());
 				break;
 			case "remove track":
-				List<TrackBean> tracks = view.getSelectedTracks();
-				AlbumBean tracksAlbum = tracks.get(0).getAlbum();
-				
-				boolean delete = view.showPopupMenu(view, -1, -1);
-				if(delete)
-					model.deleteTracks(tracks);
-				view.setTableTracks(tracksAlbum.getTracks());
-				view.updateArtists(model.getArtists());
+				removeTracks();
+				break;
+			case "get info":
+				view.displayInfoDialog(view.getSelectedTracks().get(0));
 				break;
 			}
 		}
@@ -321,6 +331,16 @@ public class MP3Controller implements Observer {
 		public void windowClosing(WindowEvent e) {
 			if (!model.closePlayer()) {
 				view.displayErrorMessage("Unable to save track database");
+			}
+		}
+	}
+
+	private class KeyListener extends KeyAdapter {
+		@Override
+		public void keyTyped(KeyEvent e) {
+			if(e.getKeyChar() == KeyEvent.VK_DELETE) {
+				System.out.println("Key Typed + delete");
+				removeTracks();
 			}
 		}
 	}

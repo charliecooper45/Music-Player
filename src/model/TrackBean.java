@@ -12,6 +12,7 @@ import javafx.util.Duration;
 public class TrackBean implements Serializable{
 	private static final long serialVersionUID = 7863985297307469985L;
 	private URI location;
+	private int trackNumber;
 	private String artist;
 	private String title;
 	private AlbumBean album;
@@ -25,8 +26,9 @@ public class TrackBean implements Serializable{
 		this.location = location;
 	}
 	
-	public TrackBean(URI location, String artist, String title, AlbumBean album, Duration duration, String genre) {
+	public TrackBean(URI location, String trackNumber, String artist, String title, AlbumBean album, Duration duration, String genre) {
 		this.location = location;
+		this.trackNumber = Integer.parseInt(trackNumber);
 		this.artist = artist;
 		this.title = title;
 		this.album = album;
@@ -34,6 +36,22 @@ public class TrackBean implements Serializable{
 		this.trackDuration = new TrackDuration(duration.toMillis()); 
 		this.genre = genre;
 	}
+
+	/**
+	 * @return the trackNumber
+	 */
+	public int getTrackNumber() {
+		return trackNumber;
+	}
+	
+
+	/**
+	 * @param trackNumber the trackNumber to set
+	 */
+	public void setTrackNumber(int trackNumber) {
+		this.trackNumber = trackNumber;
+	}
+
 
 	/**
 	 * @return the title

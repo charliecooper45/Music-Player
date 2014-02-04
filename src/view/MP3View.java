@@ -2,6 +2,7 @@ package view;
 
 import java.awt.BorderLayout;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowListener;
 import java.io.File;
@@ -11,6 +12,7 @@ import javafx.util.Duration;
 
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionListener;
@@ -89,7 +91,11 @@ public class MP3View extends JFrame {
 	public void addVolumeChangeListener(ChangeListener listener) {
 		topPanel.addVolumeChangeListener(listener);
 	}
-
+	
+	public void addKeyListener(KeyListener listener) {
+		middlePanel.addKeyListener(listener);
+	}
+	
 	/**
 	 * @param tableTracks the tableTracks to set
 	 */
@@ -165,6 +171,10 @@ public class MP3View extends JFrame {
 		JOptionPane.showMessageDialog(this, errorMessage, "Error", JOptionPane.ERROR_MESSAGE);
 	}
 
+	public void displayInfoDialog(TrackBean track) {
+		new InfoDialog(this, track);
+	}
+	
 	public void setShuffle(boolean shuffle) {
 		topPanel.changeShuffleIcon(shuffle);
 	}
