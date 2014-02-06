@@ -12,7 +12,6 @@ import javafx.util.Duration;
 
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
-import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionListener;
@@ -35,7 +34,7 @@ public class MP3View extends JFrame {
 	private BottomPanel bottomPanel;
 	private JFileChooser fileChooser;
 	private ProgressDialog progressDialog;
-
+	
 	public MP3View() {
 		super("MP3 Player");
 		setExtendedState(JFrame.MAXIMIZED_BOTH);
@@ -172,7 +171,8 @@ public class MP3View extends JFrame {
 	}
 
 	public void displayInfoDialog(TrackBean track) {
-		new InfoDialog(this, track);
+		InfoDialog infoDialog = new InfoDialog(this, track);
+		infoDialog.setVisible(true);
 	}
 	
 	public void setShuffle(boolean shuffle) {

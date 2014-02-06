@@ -54,7 +54,6 @@ public class MP3Controller implements Observer {
 		this.view.addKeyListener(new KeyListener());
 		this.model = model;
 		this.model.addObserver(this);
-
 	}
 
 	public Duration getCurrentTrackTime() {
