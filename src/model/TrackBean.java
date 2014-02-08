@@ -18,6 +18,7 @@ public class TrackBean implements Serializable{
 	private AlbumBean album;
 	private TrackDuration trackDuration;
 	private String genre;
+	private String comments;
 	private transient Duration duration;
 	
 	public TrackBean() {}
@@ -154,6 +155,22 @@ public class TrackBean implements Serializable{
 		this.genre = genre;
 	}
 	
+	/**
+	 * @return the comments
+	 */
+	public String getComments() {
+		return comments;
+	}
+
+	/**
+	 * @param comments the comments to set
+	 */
+	public void setComments(String comments) {
+		this.comments = comments;
+	}
+
+
+
 	/**
 	 * Class that allow the track duration to be serialized.
 	 * @author Charlie

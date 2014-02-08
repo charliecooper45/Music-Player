@@ -68,6 +68,13 @@ public class MP3Controller implements Observer {
 		model.playNextSong();
 	}
 
+	public void updateTrackDetails(TrackBean track, int trackNumber, String title, String artist, String album, String genre, String comments) {
+		model.updateTrackDetails(track, trackNumber, title, artist, album, genre, comments);
+		// Update the view
+		//view.setTableTracks(view.getSelectedAlbum().getTracks());
+		view.refreshTableTracks();
+	}
+	
 	@Override
 	public void update(Observable o, Object arg) {
 		if (o instanceof MP3Model) {
@@ -343,4 +350,5 @@ public class MP3Controller implements Observer {
 			}
 		}
 	}
+
 }

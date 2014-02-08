@@ -189,9 +189,15 @@ public class MiddlePanel extends JPanel {
 	 */
 	public void setTableTracks(List<TrackBean> tableTracks) {
 		this.tableTracks = tableTracks;
-		tableModel.fireTableDataChanged();
+		
 	}
-
+	
+	public void refreshTableTracks() {
+		int selectedRow = tracksTable.getSelectedRow();
+		tableModel.fireTableDataChanged();
+		tracksTable.setRowSelectionInterval(selectedRow, selectedRow);
+	}
+	
 	public ArtistBean getDisplayedArtist() {
 		return artistsList.getSelectedValue();
 	}
@@ -333,7 +339,7 @@ public class MiddlePanel extends JPanel {
 		 */
 		public void setDisplayedPlaylist(List<TrackBean> playlist) {
 			displayedTracks = new ArrayList<>(playlist);
-
+			
 			playlistTableModel.fireTableDataChanged();
 		}
 
@@ -354,4 +360,5 @@ public class MiddlePanel extends JPanel {
 			playlistTableModel.fireTableDataChanged();
 		}
 	}
+
 }

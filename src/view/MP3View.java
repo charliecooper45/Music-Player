@@ -101,6 +101,10 @@ public class MP3View extends JFrame {
 	public void setTableTracks(List<TrackBean> tableTracks) {
 		middlePanel.setTableTracks(tableTracks);
 	}
+	
+	public void refreshTableTracks() {
+		middlePanel.refreshTableTracks();
+	}
 
 	public List<TrackBean> getSelectedTracks() {
 		return middlePanel.getSelectedTracks();
@@ -171,7 +175,13 @@ public class MP3View extends JFrame {
 	}
 
 	public void displayInfoDialog(TrackBean track) {
-		InfoDialog infoDialog = new InfoDialog(this, track);
+		TrackEditedListener trackEditedListener = new TrackEditedListener() {
+			@Override
+			public void trackChanged(TrackBean track, int trackNumber, String title, String artist, String album, String genre, String comments) {
+				controller.updateTrackDetails(track, trackNumber, title, artist, album, genre, comments);
+			}					
+		};
+		InfoDialog infoDialog = new InfoDialog(this, track, trackEditedListener);
 		infoDialog.setVisible(true);
 	}
 	
@@ -210,4 +220,5 @@ public class MP3View extends JFrame {
 	public int getTrackNumber() {
 		return middlePanel.getTrackNumber();
 	}
+
 }

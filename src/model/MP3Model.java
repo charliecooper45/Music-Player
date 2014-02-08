@@ -182,6 +182,18 @@ public class MP3Model extends Observable {
 		}
 	}
 
+	public void updateTrackDetails(TrackBean track, int trackNumber, String title, String artist, String album, String genre, String comments) {
+		System.out.println("updating track: " + track.getTitle());
+		track.setTrackNumber(trackNumber);
+		track.setTitle(title);
+		track.setGenre(genre);
+		track.setComments(comments);
+		
+		//TODO NEXT: Implement this - check for existing artists/albums and if not create them
+		//TODO NEXT: Check if this is the last song for the artist/album and remove if necessary
+		// Change the artist and the album
+	}
+	
 	//TODO NEXT B: Document
 	private void playSong(TrackBean track) {
 		state.playSong(track);
@@ -601,5 +613,4 @@ public class MP3Model extends Observable {
 			trackArtist.addTrack(trackBean, trackAlbum);
 		}
 	}
-
 }

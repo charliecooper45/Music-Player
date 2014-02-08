@@ -30,7 +30,10 @@ public class InfoDialog extends JDialog {
 	private static final long serialVersionUID = 1L;
 	
 	private boolean dataChanged = false;
-
+	
+	// listeners
+	private TrackEditedListener trackEditedListener;
+	
 	// components for the dialog
 	private TrackBean track;
 	private GridBagConstraints gbc;
@@ -47,9 +50,10 @@ public class InfoDialog extends JDialog {
 	private JButton confirmBtn;
 	private JButton cancelBtn;
 
-	public InfoDialog(JFrame frame, TrackBean track) {
+	public InfoDialog(JFrame frame, TrackBean track, TrackEditedListener trackEditedListener) {
 		super(frame, "Track Information", true);
 		this.track = track;
+		this.trackEditedListener = trackEditedListener;
 		setSize(400, 500);
 		setLayout(new GridBagLayout());
 		setResizable(false);
@@ -143,7 +147,14 @@ public class InfoDialog extends JDialog {
 			public void actionPerformed(ActionEvent e) {
 				System.out.println("Data changed: " + dataChanged);
 				if(dataChanged) {
-					//TODO NEXT: Implement this - change the details of the TrackBean in the Model
+					int trackNumber = Integer.parseInt(trackNumberTxtField.getText());
+					String trackTitle = trackNameTxtField.getText();
+					String artist = artistNameTxtField.getText();
+					String album = albumNameTxtField.getText();
+					String genre = genreTxtField.getText();
+					String comments = commentTxtArea.getText();
+					
+					trackEditedListener.trackChanged(track, trackNumber, trackTitle, artist, album, genre, comments);
 				}
 				dispose();
 			}
