@@ -23,6 +23,7 @@ public class AlbumBean implements Serializable {
 
 	public void addTrack(TrackBean track) {
 		tracks.add(track);
+		track.setAlbum(this);
 		sorted = false;
 	}
 	

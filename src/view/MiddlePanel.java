@@ -189,13 +189,11 @@ public class MiddlePanel extends JPanel {
 	 */
 	public void setTableTracks(List<TrackBean> tableTracks) {
 		this.tableTracks = tableTracks;
-		
+		tableModel.fireTableDataChanged();
 	}
 	
 	public void refreshTableTracks() {
-		int selectedRow = tracksTable.getSelectedRow();
 		tableModel.fireTableDataChanged();
-		tracksTable.setRowSelectionInterval(selectedRow, selectedRow);
 	}
 	
 	public ArtistBean getDisplayedArtist() {

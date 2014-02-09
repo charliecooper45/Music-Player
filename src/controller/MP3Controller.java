@@ -72,6 +72,7 @@ public class MP3Controller implements Observer {
 		model.updateTrackDetails(track, trackNumber, title, artist, album, genre, comments);
 		// Update the view
 		//view.setTableTracks(view.getSelectedAlbum().getTracks());
+		view.updateArtists(model.getArtists());
 		view.refreshTableTracks();
 	}
 	

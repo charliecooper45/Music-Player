@@ -169,8 +169,6 @@ public class TrackBean implements Serializable{
 		this.comments = comments;
 	}
 
-
-
 	/**
 	 * Class that allow the track duration to be serialized.
 	 * @author Charlie

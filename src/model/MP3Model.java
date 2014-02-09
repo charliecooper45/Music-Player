@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Observable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -183,17 +184,80 @@ public class MP3Model extends Observable {
 	}
 
 	public void updateTrackDetails(TrackBean track, int trackNumber, String title, String artist, String album, String genre, String comments) {
-		System.out.println("updating track: " + track.getTitle());
 		track.setTrackNumber(trackNumber);
 		track.setTitle(title);
 		track.setGenre(genre);
 		track.setComments(comments);
-		
-		//TODO NEXT: Implement this - check for existing artists/albums and if not create them
-		//TODO NEXT: Check if this is the last song for the artist/album and remove if necessary
-		// Change the artist and the album
+
+		//TODO NEXT: Add functionality for changing the artist or album of a track 
+
+		if (!track.getArtist().equals(artist)) {
+			// The artist of the track has changed
+			changeArtistOfTrack(track, artist);
+			AllArtistsBean all = (AllArtistsBean) artists.get(0);
+			all.setNumberOfArtists(artists.size() - 1);
+		}
+		if (!track.getAlbum().getTitle().equals(album)) {
+			// The album of the track has changed
+			changeAlbumOfTrack(track, album);
+		}
 	}
-	
+
+	private void changeArtistOfTrack(TrackBean track, String newArtist) {
+		boolean trackAdded = false;
+
+		// Get the ArtistBean representing the old artist and remove the track
+		for (ArtistBean artist : artists) {
+			if (artist.containsTrack(track)) {
+				boolean artistEmpty = artist.removeTrack(track);
+				//TODO NEXT: Check if the artist has no tracks remaining in the database
+				if (artistEmpty)
+					artists.remove(artist);
+				break;
+			}
+		}
+
+		for (ArtistBean artist : artists) {
+			if (artist.getName().equals(newArtist)) {
+				// The artist already exists so add the track
+				artist.addTrack(track);
+				trackAdded = true;
+				break;
+			}
+		}
+
+		if (!trackAdded) {
+			// The artist does not exist so create them 
+			ArtistBean artist = new ArtistBean(newArtist);
+			artist.addTrack(track);
+			artists.add(artist);
+		}
+	}
+
+	private void changeAlbumOfTrack(TrackBean track, String newAlbum) {
+		System.out.println("Changing album");
+
+		for (ArtistBean artist : artists) {
+			if (artist.getName().equals(track.getArtist())) {
+				AlbumBean album = artist.getAlbum(newAlbum);
+				
+				List<TrackBean> trackToDelete = new ArrayList<>();
+				trackToDelete.add(track);
+				
+				boolean albumEmpty = track.getAlbum().deleteTracks(trackToDelete);
+				if (albumEmpty)
+					artist.removeAlbum(track.getAlbum());
+				
+				if(album != null) {
+					album.addTrack(track);
+				} else {
+					artist.addTrackToAlbum(track, new AlbumBean(newAlbum));
+				}
+				break;
+			}
+		}
+	}
+
 	//TODO NEXT B: Document
 	private void playSong(TrackBean track) {
 		state.playSong(track);
@@ -336,11 +400,11 @@ public class MP3Model extends Observable {
 				}
 			}
 		}
-		
+
 		// Check if one of the tracks being deleted is the current track in the playlist
 		if (playlist.size() > 0 && tracks.contains(playlist.get(currentTrackNumber))) {
 			stopSong(false);
-			
+
 			setChanged();
 			notifyObservers(null);
 		}
@@ -567,7 +631,7 @@ public class MP3Model extends Observable {
 					System.err.println("Cannot read track data");
 					return;
 				}
-				
+
 				addTrackToDatabase(Paths.get(file.toURI()), trackNumber, artist, title, album, mp3File.getLengthInMilliseconds(), genre);
 			} catch (UnsupportedTagException | InvalidDataException | IOException e) {
 				//TODO NEXT B: Produce error to show that the user has deleted a file while it is being processed (check for interrupt)
@@ -610,7 +674,7 @@ public class MP3Model extends Observable {
 			}
 
 			trackBean = new TrackBean(path.toUri(), trackNumber, artist, title, trackAlbum, new Duration(milliseconds), genre);
-			trackArtist.addTrack(trackBean, trackAlbum);
+			trackArtist.addTrackToAlbum(trackBean, trackAlbum);
 		}
 	}
 }

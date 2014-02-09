@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.ListIterator;
 
 /**
  * Represents an artist
@@ -36,7 +37,7 @@ public class ArtistBean implements Serializable {
 		return null;
 	}
 	
-	public void addTrack(TrackBean track, AlbumBean album) {
+	public void addTrackToAlbum(TrackBean track, AlbumBean album) {
 		// Check if this is a new album
 		if(!albums.contains(album))
 			albums.add(album);
@@ -49,6 +50,59 @@ public class ArtistBean implements Serializable {
 		
 		if(albums.isEmpty()) {
 			return true;
+		}
+		return false;
+	}
+
+	public void addTrack(TrackBean track) {
+		AlbumBean trackAlbum = null;
+		track.setArtist(name);
+		
+		for(AlbumBean album : albums) {
+			if(album.getTitle().equals(track.getAlbum().getTitle())) {
+				album.addTrack(track);
+				trackAlbum = album;
+				break;
+			}
+		}
+		
+		if(trackAlbum == null) {
+			trackAlbum = new AlbumBean(track.getAlbum().getTitle());
+			trackAlbum.addTrack(track);
+			albums.add(trackAlbum);
+		}
+	}
+	
+	/**
+	 * @param track to remove 
+	 * @return if the artist has no more albums remaining
+	 */
+	public boolean removeTrack(TrackBean track) {
+		ListIterator<AlbumBean> iterator = albums.listIterator();
+		
+		while(iterator.hasNext()) {
+			AlbumBean album = iterator.next();
+			if(album.getTracks().contains(track)) {
+				List<TrackBean> trackToRemove = new ArrayList<>();
+				trackToRemove.add(track);
+				boolean albumEmpty = album.deleteTracks(trackToRemove);
+				if(albumEmpty)
+					iterator.remove();
+			}
+		}
+		
+		//Check if the artist has any tracks remaining
+		if(albums.isEmpty()) 
+			return true;
+		
+		return false;
+	}
+	
+	public boolean containsTrack(TrackBean track) {
+		for(AlbumBean album : albums) {
+			if(album.getTracks().contains(track)) {
+				return true;
+			}
 		}
 		return false;
 	}
@@ -78,4 +132,6 @@ public class ArtistBean implements Serializable {
 	public String toString() {
 		return name;
 	}
+
+
 }
