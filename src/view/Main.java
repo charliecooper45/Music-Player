@@ -11,6 +11,7 @@ public class Main {
 			public void run() {
 			       MP3View theView = new MP3View();
 			       MP3Model theModel = new MP3Model();
+			       @SuppressWarnings("unused")
 			       MP3Controller theController = new MP3Controller(theView,theModel);
 
 			       theView.setVisible(true);

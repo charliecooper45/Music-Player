@@ -4,7 +4,6 @@ import java.awt.BorderLayout;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseListener;
-import java.awt.event.WindowListener;
 import java.io.File;
 import java.util.List;
 
@@ -36,13 +35,14 @@ public class MP3View extends JFrame {
 	private ProgressDialog progressDialog;
 	
 	public MP3View() {
-		super("MP3 Player");
+		super("CMedia Player");
 		setExtendedState(JFrame.MAXIMIZED_BOTH);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		init();
 	}
 
 	private void init() {
+		setIconImage(Utils.createIcon("/view/resources/images/icon.png").getImage());
 		topPanel = new TopPanel();
 		topPanel.setTopPanelListener(new TopPanelListener() {
 			@Override
@@ -63,10 +63,6 @@ public class MP3View extends JFrame {
 
 		bottomPanel = new BottomPanel();
 		add(bottomPanel, BorderLayout.SOUTH);
-	}
-
-	public void addWindowChangeListener(WindowListener listener) {
-		addWindowListener(listener);
 	}
 
 	public void addActionListener(ActionListener listener) {

@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Observable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -52,7 +51,6 @@ public class MP3Model extends Observable {
 	// Holds the number of tracks processed so far out of a batch
 	private volatile int numberProcessed;
 	// Used to execute a single ProcessFileThread threads
-	//TODO NEXT B: ensure the ExecutorService is shutdown at somepoint
 	private ExecutorService executor;
 	// Future that is used to manipulate the current ProcessFilesThread
 	private Future<?> future;
@@ -74,10 +72,6 @@ public class MP3Model extends Observable {
 	 */
 	public List<TrackBean> getPlaylist() {
 		return playlist.subList(currentTrackNumber, playlist.size());
-	}
-
-	public TrackBean getTrack(int trackNumber) {
-		return currentAlbum.getTrack(trackNumber);
 	}
 
 	public int getMP3Count(File... files) {
@@ -189,8 +183,6 @@ public class MP3Model extends Observable {
 		track.setGenre(genre);
 		track.setComments(comments);
 
-		//TODO NEXT: Add functionality for changing the artist or album of a track 
-
 		if (!track.getArtist().equals(artist)) {
 			// The artist of the track has changed
 			changeArtistOfTrack(track, artist);
@@ -210,7 +202,6 @@ public class MP3Model extends Observable {
 		for (ArtistBean artist : artists) {
 			if (artist.containsTrack(track)) {
 				boolean artistEmpty = artist.removeTrack(track);
-				//TODO NEXT: Check if the artist has no tracks remaining in the database
 				if (artistEmpty)
 					artists.remove(artist);
 				break;
@@ -258,7 +249,6 @@ public class MP3Model extends Observable {
 		}
 	}
 
-	//TODO NEXT B: Document
 	private void playSong(TrackBean track) {
 		state.playSong(track);
 		player.setMute(playerMuted);
@@ -333,8 +323,7 @@ public class MP3Model extends Observable {
 		}
 	}
 
-	public void shuffle(boolean firstTrackSelected) {
-		//TODO NEXT: Implement code to shuffle the playlist - shuffling when playing an album is not working correctly ATM
+	private void shuffle(boolean firstTrackSelected) {
 		if (!playlist.isEmpty()) {
 			if (firstTrackSelected) {
 				TrackBean firstTrack = playlist.remove(currentTrackNumber);
@@ -365,7 +354,7 @@ public class MP3Model extends Observable {
 		state.pauseSong();
 	}
 
-	public void resumeSong() {
+	private void resumeSong() {
 		state.resumeSong();
 	}
 
@@ -422,13 +411,13 @@ public class MP3Model extends Observable {
 		} catch (IOException e) {
 			return false;
 		}
+		
+		// Shutdow the executor
+		executor.shutdownNow();
 		return true;
 	}
 
 	private void saveDatabase() throws IOException {
-		//TODO NEXT B: Check if this is Windows, if so then save in my document or another location? This could be configurable. 
-		//TODO NEXT B: Configure this in preferences API.
-
 		if (!Files.exists(SAVED_DATABASE_FOLDER)) {
 			// There is no previously saved data so create the folder
 			Files.createDirectory(SAVED_DATABASE_FOLDER);
@@ -550,8 +539,6 @@ public class MP3Model extends Observable {
 		return numberProcessed;
 	}
 
-	//TODO NEXT: Multiple additions of albums not working properly
-
 	private class ProcessFile extends SimpleFileVisitor<Path> {
 		private int count = 0;
 
@@ -627,14 +614,12 @@ public class MP3Model extends Observable {
 					year = id3v2Tag.getYear();
 					genre = id3v2Tag.getGenreDescription();
 				} else {
-					//TODO NEXT B: Add correct behaviour - look up documentation to see if there is another way to read data
 					System.err.println("Cannot read track data");
 					return;
 				}
 
 				addTrackToDatabase(Paths.get(file.toURI()), trackNumber, artist, title, album, mp3File.getLengthInMilliseconds(), genre);
 			} catch (UnsupportedTagException | InvalidDataException | IOException e) {
-				//TODO NEXT B: Produce error to show that the user has deleted a file while it is being processed (check for interrupt)
 				e.printStackTrace();
 			}
 		}

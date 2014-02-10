@@ -37,7 +37,6 @@ public class TopPanel extends JPanel {
 	private TrackBean currentTrack;
 	private TopPanelListener topPanelListener;
 	private boolean muted = false;
-	//TODO NEXT: Top panel is resizing dynamically, need to prevent this
 	// The icons for shuffling
 	private ImageIcon notShuffledIcon;
 	private ImageIcon shuffledIcon;
@@ -78,7 +77,6 @@ public class TopPanel extends JPanel {
 		controlButtons = new JButton[8];
 		JPanel buttonsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		JPanel modeButtonsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		// TODO NEXT: Add these buttons with there relevant icons
 		for (int i = 0; i < controlButtons.length; i++) {
 			controlButtons[i] = new JButton();
 			if (i < 5) {
