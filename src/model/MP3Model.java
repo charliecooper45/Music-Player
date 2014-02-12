@@ -18,6 +18,7 @@ import java.util.Observable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.prefs.Preferences;
 
 import javafx.beans.property.ReadOnlyProperty;
 import javafx.scene.media.MediaPlayer;
@@ -32,6 +33,11 @@ public class MP3Model extends Observable {
 	// Holds the location of the saved database
 	private final static Path SAVED_DATABASE_FOLDER = Paths.get(System.getProperty("user.dir") + "/MediaPlayerData");
 	private final static Path SAVED_DATABASE_FILE = Paths.get(SAVED_DATABASE_FOLDER + "/data.dt");
+	// Holds the preferences information
+	private Preferences prefs = Preferences.userRoot().node(this.getClass().getName());
+	// Holds the class that manages the Lastfm functionality
+	private LastFm lastFm;
+	private boolean lastFmIsActive = false;
 	// Holds the current album and playlist
 	private List<TrackBean> playlist;
 	private volatile AlbumBean currentAlbum;
@@ -231,15 +237,15 @@ public class MP3Model extends Observable {
 		for (ArtistBean artist : artists) {
 			if (artist.getName().equals(track.getArtist())) {
 				AlbumBean album = artist.getAlbum(newAlbum);
-				
+
 				List<TrackBean> trackToDelete = new ArrayList<>();
 				trackToDelete.add(track);
-				
+
 				boolean albumEmpty = track.getAlbum().deleteTracks(trackToDelete);
 				if (albumEmpty)
 					artist.removeAlbum(track.getAlbum());
-				
-				if(album != null) {
+
+				if (album != null) {
 					album.addTrack(track);
 				} else {
 					artist.addTrackToAlbum(track, new AlbumBean(newAlbum));
@@ -411,7 +417,7 @@ public class MP3Model extends Observable {
 		} catch (IOException e) {
 			return false;
 		}
-		
+
 		// Shutdow the executor
 		executor.shutdownNow();
 		return true;
@@ -448,6 +454,24 @@ public class MP3Model extends Observable {
 			ObjectInputStream is = new ObjectInputStream(Files.newInputStream(SAVED_DATABASE_FILE));
 			artists = (List<ArtistBean>) is.readObject();
 		}
+	}
+
+	public void changeLastFMState(boolean on, String username, String password) {
+		prefs.putBoolean("lastfm", on);
+		lastFmIsActive = on;
+		
+		if(lastFmIsActive) {
+			lastFm = new LastFm(username, password);
+		} else {
+			lastFm = null;
+		}
+	}
+
+	public boolean getLastFMState() {
+		lastFmIsActive = prefs.getBoolean("lastfm", false);
+		return lastFmIsActive;
+		
+		//TODO NEXT: Add the code to scrobble the currently playing track to lastfm servers (possible in the controller?)
 	}
 
 	public void setVolume(double value) {

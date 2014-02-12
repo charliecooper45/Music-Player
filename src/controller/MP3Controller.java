@@ -76,6 +76,15 @@ public class MP3Controller implements Observer {
 		view.refreshTableTracks();
 	}
 	
+	public void changeLastFMState(boolean on, String username, String password) {
+		model.changeLastFMState(on, username, password);
+		System.out.println("Changing lastfm state to: " + on);
+	}
+	
+	public boolean getLastFMState() {
+		return model.getLastFMState();
+	}
+	
 	@Override
 	public void update(Observable o, Object arg) {
 		if (o instanceof MP3Model) {
@@ -136,7 +145,7 @@ public class MP3Controller implements Observer {
 					model.playNextSong();
 					break;
 				case "addmusic":
-					final File[] files = view.showJFileChooser();
+					final File[] files = view.displayJFileChooser();
 
 					if (files != null) {
 						int mp3Count = model.getMP3Count(files);
@@ -152,8 +161,11 @@ public class MP3Controller implements Observer {
 							}
 						};
 						new Thread(run).start();
-						view.showProgressDialog(mp3Count, buttonListener);
+						view.displayProgressDialog(mp3Count, buttonListener);
 					}
+					break;
+				case "settings":
+					view.displaySettingsDialog();
 					break;
 				case "cancel":
 					model.stopProcessFilesThread();

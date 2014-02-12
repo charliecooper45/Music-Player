@@ -7,13 +7,13 @@ import javax.swing.JButton;
 import javax.swing.JPanel;
 
 /**
- * A JPanel which displays the add icon
+ * A JPanel which displays the icons at the bottom of the screen
  * @author Charlie
- *
  */
 @SuppressWarnings("serial")
 public class BottomPanel extends JPanel{
 	private JButton addTracksButton;
+	private JButton settingsButton;
 	
 	public BottomPanel() {
 		setLayout(new FlowLayout(FlowLayout.RIGHT));
@@ -21,6 +21,11 @@ public class BottomPanel extends JPanel{
 	}
 	
 	private void init() {
+		settingsButton = new JButton("Settings");
+		settingsButton.setName("settings");
+		settingsButton.setIcon(Utils.createIcon("/view/resources/images/settingsicon.png"));
+		add(settingsButton);
+		
 		addTracksButton = new JButton("Add Music");
 		addTracksButton.setName("addmusic");
 		addTracksButton.setIcon(Utils.createIcon("/view/resources/images/addicon.png"));
@@ -34,5 +39,6 @@ public class BottomPanel extends JPanel{
 	public void addActionListener(ActionListener listener) {
 		// Add listener to the buttons
 		addTracksButton.addActionListener(listener);
+		settingsButton.addActionListener(listener);
 	}
 }

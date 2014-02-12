@@ -32,6 +32,7 @@ public class MP3View extends JFrame {
 	private MiddlePanel middlePanel;
 	private BottomPanel bottomPanel;
 	private JFileChooser fileChooser;
+	private SettingsDialog settingsDialog;
 	private ProgressDialog progressDialog;
 	
 	public MP3View() {
@@ -42,6 +43,7 @@ public class MP3View extends JFrame {
 	}
 
 	private void init() {
+		//TODO NEXT B: set minimum size
 		setIconImage(Utils.createIcon("/view/resources/images/icon.png").getImage());
 		topPanel = new TopPanel();
 		topPanel.setTopPanelListener(new TopPanelListener() {
@@ -120,7 +122,7 @@ public class MP3View extends JFrame {
 		middlePanel.updatePlaylist(null);
 	}
 
-	public File[] showJFileChooser() {
+	public File[] displayJFileChooser() {
 		fileChooser = new JFileChooser(new File("C:/Users/Charlie/Desktop"));
 		fileChooser.addChoosableFileFilter(new FileFilter() {
 
@@ -145,8 +147,28 @@ public class MP3View extends JFrame {
 		}
 		return null;
 	}
+	
+	public void displaySettingsDialog() {
+		if(settingsDialog == null) {
+			SettingsChangedListener settingsChangedListener = new SettingsChangedListener() {
+				@Override
+				public void lastFMOn(String username, String password) {
+					controller.changeLastFMState(true, username, password);
+				}
+				
+				@Override
+				public void lastFMOff() {
+					controller.changeLastFMState(false, null, null);
+				}
+			};
+			boolean lastFmOn = controller.getLastFMState();
+			settingsDialog = new SettingsDialog(this, settingsChangedListener, lastFmOn);
+		}
+		
+		settingsDialog.setVisible(true);
+	}
 
-	public void showProgressDialog(int maximumSize, ActionListener listener) {
+	public void displayProgressDialog(int maximumSize, ActionListener listener) {
 		progressDialog = new ProgressDialog(this, maximumSize);
 		progressDialog.addActionListener(listener);
 		progressDialog.setProgressDialogListener(new ProgressDialogListener() {
@@ -157,15 +179,7 @@ public class MP3View extends JFrame {
 		});
 		progressDialog.setVisible(true);
 	}
-
-	public void disposeProgressDialog() {
-		progressDialog.disposeDialog();
-	}
-
-	public void updateArtists(List<ArtistBean> artists) {
-		middlePanel.updateArtists(artists);
-	}
-
+	
 	public void displayErrorMessage(String errorMessage) {
 		JOptionPane.showMessageDialog(this, errorMessage, "Error", JOptionPane.ERROR_MESSAGE);
 	}
@@ -179,6 +193,14 @@ public class MP3View extends JFrame {
 		};
 		InfoDialog infoDialog = new InfoDialog(this, track, trackEditedListener);
 		infoDialog.setVisible(true);
+	}
+
+	public void disposeProgressDialog() {
+		progressDialog.disposeDialog();
+	}
+
+	public void updateArtists(List<ArtistBean> artists) {
+		middlePanel.updateArtists(artists);
 	}
 	
 	public void setShuffle(boolean shuffle) {
@@ -216,5 +238,4 @@ public class MP3View extends JFrame {
 	public int getTrackNumber() {
 		return middlePanel.getTrackNumber();
 	}
-
 }
