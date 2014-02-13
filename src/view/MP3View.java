@@ -148,24 +148,36 @@ public class MP3View extends JFrame {
 		return null;
 	}
 	
-	public void displaySettingsDialog() {
+	public void displaySettingsDialog(String username, String password) {
 		if(settingsDialog == null) {
 			SettingsChangedListener settingsChangedListener = new SettingsChangedListener() {
 				@Override
-				public void lastFMOn(String username, String password) {
-					controller.changeLastFMState(true, username, password);
+				public boolean lastFMOn(String username, String password) {
+					boolean success = controller.changeLastFMState(true, username, password);
+					if(!success) {
+						// The username or password is incorrect
+						displayErrorMessage("Cannot connect to Last.fm, please check your username and password.");
+						return false;
+					}
+					bottomPanel.setLastFmStatus(true, username);
+					return true;
 				}
 				
 				@Override
 				public void lastFMOff() {
 					controller.changeLastFMState(false, null, null);
+					bottomPanel.setLastFmStatus(false, null);
 				}
 			};
 			boolean lastFmOn = controller.getLastFMState();
-			settingsDialog = new SettingsDialog(this, settingsChangedListener, lastFmOn);
+			settingsDialog = new SettingsDialog(this, settingsChangedListener, lastFmOn, username, password);
 		}
 		
 		settingsDialog.setVisible(true);
+	}
+	
+	public void setLastFmStatus(boolean on, String username) {
+		bottomPanel.setLastFmStatus(true, username);
 	}
 
 	public void displayProgressDialog(int maximumSize, ActionListener listener) {
@@ -227,7 +239,7 @@ public class MP3View extends JFrame {
 		middlePanel.setDisplayedPlaylist(playlist);
 	}
 
-	public boolean showPopupMenu(Object component, int x, int y) {
+	public boolean displayPopupMenu(Object component, int x, int y) {
 		return middlePanel.showPopupMenu(component, x, y);
 	}
 	

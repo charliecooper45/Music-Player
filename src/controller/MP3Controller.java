@@ -54,6 +54,11 @@ public class MP3Controller implements Observer {
 		this.view.addKeyListener(new KeyListener());
 		this.model = model;
 		this.model.addObserver(this);
+		
+		boolean lastFmState = model.getLastFMState();
+		if(lastFmState) {
+			view.setLastFmStatus(lastFmState, model.getLastFmUsername());
+		}
 	}
 
 	public Duration getCurrentTrackTime() {
@@ -76,9 +81,8 @@ public class MP3Controller implements Observer {
 		view.refreshTableTracks();
 	}
 	
-	public void changeLastFMState(boolean on, String username, String password) {
-		model.changeLastFMState(on, username, password);
-		System.out.println("Changing lastfm state to: " + on);
+	public boolean changeLastFMState(boolean on, String username, String password) {
+		return model.changeLastFMState(on, username, password);
 	}
 	
 	public boolean getLastFMState() {
@@ -101,7 +105,9 @@ public class MP3Controller implements Observer {
 				view.updatePlayingTrack((TrackBean) arg);
 			} else if (arg == null) {
 				view.stopPlayingTrack();
-			} 
+			} else if (arg instanceof String) {
+				System.out.println("Update lastfm here!");
+			}
 		}
 	}
 
@@ -109,7 +115,7 @@ public class MP3Controller implements Observer {
 		List<TrackBean> tracks = view.getSelectedTracks();
 		AlbumBean tracksAlbum = tracks.get(0).getAlbum();
 		
-		boolean delete = view.showPopupMenu(view, -1, -1);
+		boolean delete = view.displayPopupMenu(view, -1, -1);
 		if(delete)
 			model.deleteTracks(tracks);
 		view.setTableTracks(tracksAlbum.getTracks());
@@ -165,7 +171,14 @@ public class MP3Controller implements Observer {
 					}
 					break;
 				case "settings":
-					view.displaySettingsDialog();
+					String username = null;
+					String password = null;
+					boolean lastFmActive = model.getLastFMState();
+					if(lastFmActive) {
+						 username = model.getLastFmUsername();
+						 password = model.getLastFmPassword();
+					}
+					view.displaySettingsDialog(username, password);
 					break;
 				case "cancel":
 					model.stopProcessFilesThread();
@@ -267,7 +280,7 @@ public class MP3Controller implements Observer {
 					table.changeSelection(row, 0, false, false);
 				}
 				
-				view.showPopupMenu(table, e.getX(), e.getY());
+				view.displayPopupMenu(table, e.getX(), e.getY());
 			} else {
 				int selectedRow = table.getSelectedRow();
 

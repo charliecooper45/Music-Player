@@ -71,6 +71,14 @@ public class MP3Model extends Observable {
 		playingState = new PlayingState(this);
 		pausedState = new PausedState(this);
 		state = initialState;
+		
+		if(prefs.getBoolean("lastfm", false)) {
+			String username = prefs.get("username", null);
+			String password = prefs.get("password", null);
+			System.out.println("Loaded: " + username + " " + password);
+			lastFm = new LastFm(username, password);
+			lastFm.connect();
+		}
 	}
 
 	/**
@@ -456,22 +464,47 @@ public class MP3Model extends Observable {
 		}
 	}
 
-	public void changeLastFMState(boolean on, String username, String password) {
-		prefs.putBoolean("lastfm", on);
+	/**
+	 * @param on
+	 * @param username
+	 * @param password
+	 * @param startup
+	 * @return false if the username or password were incorrect
+	 */
+	public boolean changeLastFMState(boolean on, String username, String password) {
+		//TODO NEXT: Currently always re-connect to lastfm, check that this is not already connected
 		lastFmIsActive = on;
-		
-		if(lastFmIsActive) {
+
+		if (lastFmIsActive) {
 			lastFm = new LastFm(username, password);
+			boolean connected = lastFm.connect();
+			if (connected) {
+				prefs.putBoolean("lastfm", on);
+				prefs.put("username", username);
+				prefs.put("password", password);
+			}
+			return connected;
 		} else {
 			lastFm = null;
+			prefs.putBoolean("lastfm", false);
+			prefs.remove("username");
+			prefs.remove("password");
+			return true;
 		}
 	}
 
 	public boolean getLastFMState() {
+		//TODO NEXT: Add the code to scrobble the currently playing track to lastfm servers (possible in the controller?)
 		lastFmIsActive = prefs.getBoolean("lastfm", false);
 		return lastFmIsActive;
-		
-		//TODO NEXT: Add the code to scrobble the currently playing track to lastfm servers (possible in the controller?)
+	}
+
+	public String getLastFmUsername() {
+		return lastFm.getUsername();
+	}
+
+	public String getLastFmPassword() {
+		return lastFm.getPassword();
 	}
 
 	public void setVolume(double value) {
