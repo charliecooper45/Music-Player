@@ -89,6 +89,10 @@ public class MP3Controller implements Observer {
 		return model.getLastFMState();
 	}
 	
+	public boolean scrobbleTrack(TrackBean currentTrack) {
+		return model.scrobbleTrack(currentTrack);
+	}
+	
 	@Override
 	public void update(Observable o, Object arg) {
 		if (o instanceof MP3Model) {

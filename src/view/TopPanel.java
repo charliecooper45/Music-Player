@@ -20,6 +20,7 @@ import javax.swing.JSlider;
 import javax.swing.SwingWorker;
 import javax.swing.event.ChangeListener;
 
+import model.LastFm;
 import model.TrackBean;
 
 /**
@@ -28,6 +29,7 @@ import model.TrackBean;
  */
 @SuppressWarnings("serial")
 public class TopPanel extends JPanel {
+	private TopPanelListener topPanelListener;
 	private GridBagConstraints gc;
 	private JLabel time;
 	private JLabel trackInfo;
@@ -35,8 +37,8 @@ public class TopPanel extends JPanel {
 	private JProgressBar trackProgress;
 	private JButton[] controlButtons;
 	private TrackBean currentTrack;
-	private TopPanelListener topPanelListener;
 	private boolean muted = false;
+	private boolean lastFm = false;
 	// The icons for shuffling
 	private ImageIcon notShuffledIcon;
 	private ImageIcon shuffledIcon;
@@ -208,6 +210,10 @@ public class TopPanel extends JPanel {
 		this.topPanelListener = topPanelListener;
 	}
 
+	public void setLastFmStatus(boolean status) {
+		lastFm = status;
+	}
+	
 	// SwingWorker - loops and updates the gui components on the TopPanel
 	private class UpdateGUI extends SwingWorker<Duration, Duration> {
 		
@@ -229,8 +235,16 @@ public class TopPanel extends JPanel {
 		
 		@Override
 		protected Duration doInBackground() throws Exception {
+			boolean scrobbled = false;
+			
 			while(trackProgress.getValue() < trackProgress.getMaximum()) {
 				Duration d = topPanelListener.getCurrentTrackTime();
+				if(lastFm && trackProgress.getValue() >= (trackProgress.getMaximum() / 2) && !scrobbled) {
+					scrobbled = true;
+					// scrobble songs to last.fm after half the track
+					topPanelListener.scrobbleTrack(currentTrack);
+					System.err.println("Scrobble: " + scrobbled);
+				}
 				publish(d);
 				Thread.sleep(500);
 			}

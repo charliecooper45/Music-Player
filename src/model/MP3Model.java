@@ -40,7 +40,6 @@ public class MP3Model extends Observable {
 	private boolean lastFmIsActive = false;
 	// Holds the current album and playlist
 	private List<TrackBean> playlist;
-	private volatile AlbumBean currentAlbum;
 	private int currentTrackNumber;
 	// Holds the artist database
 	private volatile List<ArtistBean> artists;
@@ -166,7 +165,6 @@ public class MP3Model extends Observable {
 	 * @param currentAlbum the album that is selected
 	 */
 	public void setAlbum(AlbumBean currentAlbum, int currentTrackNumber) {
-		this.currentAlbum = currentAlbum;
 		this.currentTrackNumber = currentTrackNumber;
 
 		playlist = new ArrayList<>(currentAlbum.getTracks());
@@ -353,7 +351,6 @@ public class MP3Model extends Observable {
 		// Called when a playlist is finished
 		playlist.clear();
 		currentTrackNumber = 0;
-		currentAlbum = null;
 	}
 
 	public void mute() {
@@ -476,6 +473,12 @@ public class MP3Model extends Observable {
 		lastFmIsActive = on;
 
 		if (lastFmIsActive) {
+			if(lastFm != null) {
+				String currentUsername = lastFm.getUsername();
+				if(currentUsername.equals(username)) {
+					return true;
+				}
+			}
 			lastFm = new LastFm(username, password);
 			boolean connected = lastFm.connect();
 			if (connected) {
@@ -507,6 +510,13 @@ public class MP3Model extends Observable {
 		return lastFm.getPassword();
 	}
 
+	public boolean scrobbleTrack(TrackBean currentTrack) {
+		if(lastFmIsActive) {
+			return lastFm.scrobbleTrack(currentTrack);
+		}
+		return true;
+	}
+	
 	public void setVolume(double value) {
 		volume = value;
 
@@ -719,4 +729,5 @@ public class MP3Model extends Observable {
 			trackArtist.addTrackToAlbum(trackBean, trackAlbum);
 		}
 	}
+
 }

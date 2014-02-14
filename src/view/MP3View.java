@@ -57,6 +57,13 @@ public class MP3View extends JFrame {
 				// The current track has finished playing so alert the controller
 				controller.songFinished();
 			}
+			
+			@Override
+			public void scrobbleTrack(TrackBean currentTrack) {
+				if(!controller.scrobbleTrack(currentTrack)) {
+					MP3View.this.displayErrorMessage("Unable to scrobble to last.fm");
+				}
+			}
 		});
 		add(topPanel, BorderLayout.NORTH);
 
@@ -160,6 +167,7 @@ public class MP3View extends JFrame {
 						return false;
 					}
 					bottomPanel.setLastFmStatus(true, username);
+					topPanel.setLastFmStatus(true);
 					return true;
 				}
 				
@@ -167,6 +175,7 @@ public class MP3View extends JFrame {
 				public void lastFMOff() {
 					controller.changeLastFMState(false, null, null);
 					bottomPanel.setLastFmStatus(false, null);
+					topPanel.setLastFmStatus(false);
 				}
 			};
 			boolean lastFmOn = controller.getLastFMState();
@@ -177,7 +186,8 @@ public class MP3View extends JFrame {
 	}
 	
 	public void setLastFmStatus(boolean on, String username) {
-		bottomPanel.setLastFmStatus(true, username);
+		bottomPanel.setLastFmStatus(on, username);
+		topPanel.setLastFmStatus(on);
 	}
 
 	public void displayProgressDialog(int maximumSize, ActionListener listener) {

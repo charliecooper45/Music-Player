@@ -1,10 +1,13 @@
 package model;
 
+import javafx.util.Duration;
 import de.umass.lastfm.Authenticator;
 import de.umass.lastfm.Session;
+import de.umass.lastfm.Track;
+import de.umass.lastfm.scrobble.ScrobbleData;
+import de.umass.lastfm.scrobble.ScrobbleResult;
 
 //TODO NEXT: Implement this class
-//TODO NEXT: Make sure lastfm connects when we start the program
 public class LastFm {
 	private static final String API_KEY = "d6256d27feb88ff326f6f5b442468bc1";
 	private static final String SECRET = "41685746b10fd47f841c17db28144d97";
@@ -30,6 +33,26 @@ public class LastFm {
 			return true;
 		}
 	}
+	
+	private void updateLastFmNowPlaying(TrackBean track, int timeStamp) {
+		int time = (int) track.getDuration().toSeconds();
+		
+		ScrobbleData data = new ScrobbleData(track.getArtist(), track.getTitle(), timeStamp, time, track.getAlbum().getTitle(), track.getArtist(), "", track.getTrackNumber(), "");
+		Track.updateNowPlaying(data, session);
+	}
+	
+	public boolean scrobbleTrack(TrackBean track) {
+		//TODO NEXT: Check what happens if lastfm is turnedon during a track getting played, also check for double scrobbling bug
+		String artist = track.getArtist();
+		String title = track.getTitle();
+		
+		int duration = (int) track.getDuration().toSeconds();
+		updateLastFmNowPlaying(track, (duration/2));
+		
+	    int now = (int) (System.currentTimeMillis() / 1000);
+	    ScrobbleResult result2 = Track.scrobble(artist, title, now, session);
+	    return (result2.isSuccessful() && !result2.isIgnored());
+	}
 
 	/**
 	 * @return the username
@@ -44,6 +67,4 @@ public class LastFm {
 	public String getPassword() {
 		return password;
 	}
-	
-	
 }

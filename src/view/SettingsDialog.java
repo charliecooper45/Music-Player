@@ -8,11 +8,13 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
+import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
@@ -35,10 +37,11 @@ public class SettingsDialog extends JDialog {
 	private JLabel passwordLbl;
 	private JTextField usernameTxt;
 	private JPasswordField passwordTxt;
+	private JButton confirmButton;
+	private JButton cancelButton;
 
 	public SettingsDialog(JFrame frame, SettingsChangedListener settingsChangedListener, boolean lastFmOn, String username, String password) {
 		super(frame, "Settings", true);
-		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		this.settingsChangedListener = settingsChangedListener;
 		this.lastFmOn = lastFmOn;
 		setIconImage(Utils.createIcon("/view/resources/images/settingsicon.png").getImage());
@@ -51,28 +54,18 @@ public class SettingsDialog extends JDialog {
 		setLocationRelativeTo(frame);
 	}
 
-	private void init(String username, String password) {
+	private void init(String username, String password) {	
 		addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosing(WindowEvent e) {
-				if(lastFmBox.isSelected()) {
-					String username = usernameTxt.getText().trim();
-					String password = new String(passwordTxt.getPassword()).trim();
-					
-					if(username.isEmpty() || password.isEmpty()) {
-						JOptionPane.showMessageDialog(SettingsDialog.this, "The username or password field cannot be empty", "Error", JOptionPane.ERROR_MESSAGE);
-					} else {
-						boolean success = settingsChangedListener.lastFMOn(username, password);
-						if(success) 
-							SettingsDialog.this.dispose();
-					}
-				} else {
-					settingsChangedListener.lastFMOff();
-					SettingsDialog.this.dispose();
+				if(!lastFmOn) {
+					lastFmBox.setSelected(false);
+					usernameTxt.setText("");
+					passwordTxt.setText("");
 				}
+				SettingsDialog.this.dispose();
 			}
 		});
-		
 		gbc = new GridBagConstraints();
 		gbc.weightx = 1;
 		gbc.weighty = 1;
@@ -127,5 +120,53 @@ public class SettingsDialog extends JDialog {
 			usernameTxt.setText(username);
 			passwordTxt.setText(password);
 		}
+		
+		Insets defaultInsets = new Insets(0, 0, 0, 0);
+		gbc.insets = defaultInsets;
+		gbc.weightx = 1;
+		Utils.setGBC(gbc, 0, 3, 4, 1, GridBagConstraints.BOTH);
+		JPanel buttonPanel = new JPanel();
+		confirmButton = new JButton("Confirm");
+		confirmButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				if(lastFmBox.isSelected()) {
+					String username = usernameTxt.getText().trim();
+					String password = new String(passwordTxt.getPassword()).trim();
+					
+					if(username.isEmpty() || password.isEmpty()) {
+						JOptionPane.showMessageDialog(SettingsDialog.this, "The username or password field cannot be empty", "Error", JOptionPane.ERROR_MESSAGE);
+					} else {
+						boolean success = settingsChangedListener.lastFMOn(username, password);
+						if(success)  {
+							lastFmOn = true;
+							SettingsDialog.this.dispose();
+						}
+					}
+				} else {
+					lastFmOn = false;
+					settingsChangedListener.lastFMOff();
+					usernameTxt.setText("");
+					passwordTxt.setText("");
+					SettingsDialog.this.dispose();
+				}
+			}
+		});
+		buttonPanel.add(confirmButton);
+		cancelButton = new JButton("Cancel");
+		cancelButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if(!lastFmOn) {
+					lastFmBox.setSelected(false);
+					usernameTxt.setText("");
+					passwordTxt.setText("");
+				}
+				SettingsDialog.this.dispose();
+			}
+		});
+		buttonPanel.add(cancelButton);
+		add(buttonPanel, gbc);
+		
 	}
 }
