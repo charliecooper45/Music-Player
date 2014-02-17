@@ -23,6 +23,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
+import javax.swing.SwingConstants;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -63,7 +64,7 @@ public class MiddlePanel extends JPanel {
 		tableModel = new TracksTableModel();
 		tracksTable = new JTable(tableModel);
 		DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
-		centerRenderer.setHorizontalAlignment(JLabel.CENTER);
+		centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
 		for (int i = 0; i < tracksTable.getColumnCount(); i++) {
 			tracksTable.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
 		}
@@ -116,6 +117,7 @@ public class MiddlePanel extends JPanel {
 	 * Adds an ActionListener from the view to the appropriate components
 	 * @param listener
 	 */
+	@Override
 	public void addMouseListener(MouseListener listener) {
 		// Add listener to the table
 		tracksTable.addMouseListener(listener);
@@ -138,6 +140,7 @@ public class MiddlePanel extends JPanel {
 		}
 	}
 
+	@Override
 	public void addKeyListener(KeyListener listener) {
 		tracksTable.addKeyListener(listener);
 	}

@@ -1,13 +1,11 @@
 package model;
 
-import javafx.util.Duration;
 import de.umass.lastfm.Authenticator;
 import de.umass.lastfm.Session;
 import de.umass.lastfm.Track;
 import de.umass.lastfm.scrobble.ScrobbleData;
 import de.umass.lastfm.scrobble.ScrobbleResult;
 
-//TODO NEXT: Implement this class
 public class LastFm {
 	private static final String API_KEY = "d6256d27feb88ff326f6f5b442468bc1";
 	private static final String SECRET = "41685746b10fd47f841c17db28144d97";

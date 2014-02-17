@@ -344,7 +344,7 @@ public class MP3Controller implements Observer {
 				int value = slider.getValue();
 
 				// Convert to a double value for use with the model 
-				double doubleValue = (double) (value / 100.0);
+				double doubleValue = value / 100.0;
 				model.setVolume(doubleValue);
 			}
 		}

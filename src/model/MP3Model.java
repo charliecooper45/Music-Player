@@ -238,8 +238,6 @@ public class MP3Model extends Observable {
 	}
 
 	private void changeAlbumOfTrack(TrackBean track, String newAlbum) {
-		System.out.println("Changing album");
-
 		for (ArtistBean artist : artists) {
 			if (artist.getName().equals(track.getArtist())) {
 				AlbumBean album = artist.getAlbum(newAlbum);
@@ -469,7 +467,6 @@ public class MP3Model extends Observable {
 	 * @return false if the username or password were incorrect
 	 */
 	public boolean changeLastFMState(boolean on, String username, String password) {
-		//TODO NEXT: Currently always re-connect to lastfm, check that this is not already connected
 		lastFmIsActive = on;
 
 		if (lastFmIsActive) {
@@ -497,7 +494,6 @@ public class MP3Model extends Observable {
 	}
 
 	public boolean getLastFMState() {
-		//TODO NEXT: Add the code to scrobble the currently playing track to lastfm servers (possible in the controller?)
 		lastFmIsActive = prefs.getBoolean("lastfm", false);
 		return lastFmIsActive;
 	}
@@ -660,7 +656,7 @@ public class MP3Model extends Observable {
 		private void createTrack(File file) {
 			numberProcessed = numberProcessed + 1;
 			Mp3File mp3File;
-			String trackNumber, artist, title, album, year, genre;
+			String trackNumber, artist, title, album, genre;
 			try {
 				mp3File = new Mp3File(file.getAbsolutePath());
 
@@ -670,7 +666,6 @@ public class MP3Model extends Observable {
 					artist = id3v1Tag.getArtist();
 					title = id3v1Tag.getTitle();
 					album = id3v1Tag.getAlbum();
-					year = id3v1Tag.getYear();
 					genre = id3v1Tag.getGenreDescription();
 				} else if (mp3File.hasId3v2Tag()) {
 					ID3v1 id3v2Tag = mp3File.getId3v2Tag();
@@ -678,7 +673,6 @@ public class MP3Model extends Observable {
 					artist = id3v2Tag.getArtist();
 					title = id3v2Tag.getTitle();
 					album = id3v2Tag.getAlbum();
-					year = id3v2Tag.getYear();
 					genre = id3v2Tag.getGenreDescription();
 				} else {
 					System.err.println("Cannot read track data");

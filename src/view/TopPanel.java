@@ -17,10 +17,10 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JSlider;
+import javax.swing.SwingConstants;
 import javax.swing.SwingWorker;
 import javax.swing.event.ChangeListener;
 
-import model.LastFm;
 import model.TrackBean;
 
 /**
@@ -55,22 +55,22 @@ public class TopPanel extends JPanel {
 	private void init() {
 		time = new JLabel("0:00");
 		time.setFont(new Font(Font.SERIF, Font.BOLD, 40));
-		time.setHorizontalAlignment(JLabel.CENTER);
+		time.setHorizontalAlignment(SwingConstants.CENTER);
 		Utils.setGBC(gc, 1, 1, 1, 2, GridBagConstraints.BOTH);
 		gc.weightx = 1;
 		gc.weighty = 1;
 		add(time, gc);
 
-		trackInfo = new JLabel("Arcade Fire - Intervention(4:19)");
+		trackInfo = new JLabel();
 		Utils.setGBC(gc, 2, 1, 1, 1, GridBagConstraints.BOTH);
 		add(trackInfo, gc);
 
-		volumeControl = new JSlider(JSlider.HORIZONTAL, 0, 100, 50);
+		volumeControl = new JSlider(SwingConstants.HORIZONTAL, 0, 100, 50);
 		Utils.setGBC(gc, 2, 2, 1, 1, GridBagConstraints.BOTH);
 		gc.weighty = 0.8;
 		add(volumeControl, gc);
 
-		trackProgress = new JProgressBar(JProgressBar.HORIZONTAL);
+		trackProgress = new JProgressBar(SwingConstants.HORIZONTAL);
 		trackProgress.setEnabled(false);
 		Utils.setGBC(gc, 1, 3, 2, 1, GridBagConstraints.BOTH);
 		gc.weighty = 1;
@@ -198,6 +198,7 @@ public class TopPanel extends JPanel {
 	 * Adds an ActionListener from the view to the appropriate components
 	 * @param listener
 	 */
+	@Override
 	public void addMouseListener(MouseListener listener) {
 		// Add listener to the progress bar
 		trackProgress.addMouseListener(listener);

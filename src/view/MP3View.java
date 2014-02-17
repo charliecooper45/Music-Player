@@ -1,6 +1,8 @@
 package view;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.Frame;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseListener;
@@ -37,13 +39,13 @@ public class MP3View extends JFrame {
 	
 	public MP3View() {
 		super("CMedia Player");
-		setExtendedState(JFrame.MAXIMIZED_BOTH);
+		setMinimumSize(new Dimension(600, 500));
+		setExtendedState(Frame.MAXIMIZED_BOTH);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		init();
 	}
 
 	private void init() {
-		//TODO NEXT B: set minimum size
 		setIconImage(Utils.createIcon("/view/resources/images/icon.png").getImage());
 		topPanel = new TopPanel();
 		topPanel.setTopPanelListener(new TopPanelListener() {
@@ -83,6 +85,7 @@ public class MP3View extends JFrame {
 		middlePanel.addActionListener(listener);
 	}
 	
+	@Override
 	public void addMouseListener(MouseListener listener) {
 		middlePanel.addMouseListener(listener);
 		topPanel.addMouseListener(listener);
@@ -96,6 +99,7 @@ public class MP3View extends JFrame {
 		topPanel.addVolumeChangeListener(listener);
 	}
 	
+	@Override
 	public void addKeyListener(KeyListener listener) {
 		middlePanel.addKeyListener(listener);
 	}
