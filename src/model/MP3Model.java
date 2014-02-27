@@ -25,6 +25,7 @@ import javafx.scene.media.MediaPlayer;
 import javafx.util.Duration;
 
 import com.mpatric.mp3agic.ID3v1;
+import com.mpatric.mp3agic.ID3v2;
 import com.mpatric.mp3agic.InvalidDataException;
 import com.mpatric.mp3agic.Mp3File;
 import com.mpatric.mp3agic.UnsupportedTagException;
@@ -70,8 +71,8 @@ public class MP3Model extends Observable {
 		playingState = new PlayingState(this);
 		pausedState = new PausedState(this);
 		state = initialState;
-		
-		if(prefs.getBoolean("lastfm", false)) {
+
+		if (prefs.getBoolean("lastfm", false)) {
 			String username = prefs.get("username", null);
 			String password = prefs.get("password", null);
 			System.out.println("Loaded: " + username + " " + password);
@@ -470,9 +471,9 @@ public class MP3Model extends Observable {
 		lastFmIsActive = on;
 
 		if (lastFmIsActive) {
-			if(lastFm != null) {
+			if (lastFm != null) {
 				String currentUsername = lastFm.getUsername();
-				if(currentUsername.equals(username)) {
+				if (currentUsername.equals(username)) {
 					return true;
 				}
 			}
@@ -507,12 +508,12 @@ public class MP3Model extends Observable {
 	}
 
 	public boolean scrobbleTrack(TrackBean currentTrack) {
-		if(lastFmIsActive) {
+		if (lastFmIsActive) {
 			return lastFm.scrobbleTrack(currentTrack);
 		}
 		return true;
 	}
-	
+
 	public void setVolume(double value) {
 		volume = value;
 
@@ -624,16 +625,27 @@ public class MP3Model extends Observable {
 		}
 	};
 
+	//TODO NEXT: When running on desktop music is not getting saved
+	//TODO NEXT: Thread appears to still run after cancel is pressed
+	//TODO NEXT: possible log file for unread files?
 	private class ProcessFilesThread extends Thread {
 		private File[] files;
+		private List<File> unreadFiles;
 
 		public ProcessFilesThread(File... files2) {
 			this.files = files2;
+			unreadFiles = new ArrayList<>();
 		}
 
 		@Override
 		public void run() {
 			processFiles(files);
+			
+			// display any error messages
+			if(unreadFiles.size() != 0) {
+				setChanged();
+				notifyObservers(unreadFiles);
+			}
 		}
 
 		private void processFiles(File[] files) {
@@ -654,12 +666,13 @@ public class MP3Model extends Observable {
 		}
 
 		private void createTrack(File file) {
+			boolean trackRead = false;
+
 			numberProcessed = numberProcessed + 1;
 			Mp3File mp3File;
 			String trackNumber, artist, title, album, genre;
 			try {
 				mp3File = new Mp3File(file.getAbsolutePath());
-
 				if (mp3File.hasId3v1Tag()) {
 					ID3v1 id3v1Tag = mp3File.getId3v1Tag();
 					trackNumber = id3v1Tag.getTrack();
@@ -667,21 +680,31 @@ public class MP3Model extends Observable {
 					title = id3v1Tag.getTitle();
 					album = id3v1Tag.getAlbum();
 					genre = id3v1Tag.getGenreDescription();
-				} else if (mp3File.hasId3v2Tag()) {
-					ID3v1 id3v2Tag = mp3File.getId3v2Tag();
+					addTrackToDatabase(Paths.get(file.toURI()), trackNumber, artist, title, album, mp3File.getLengthInMilliseconds(), genre);
+					trackRead = true;
+				} else if(mp3File.hasId3v2Tag()) {
+					ID3v2 id3v2Tag = mp3File.getId3v2Tag();
 					trackNumber = id3v2Tag.getTrack();
 					artist = id3v2Tag.getArtist();
 					title = id3v2Tag.getTitle();
 					album = id3v2Tag.getAlbum();
 					genre = id3v2Tag.getGenreDescription();
+					// is the error with the trackNumber?!
+					addTrackToDatabase(Paths.get(file.toURI()), trackNumber, artist, title, album, mp3File.getLengthInMilliseconds(), genre);
+					trackRead = true;
 				} else {
-					System.err.println("Cannot read track data");
-					return;
+					System.out.println("File: " + file + " cannot be read");
+					//System.err.println("Cannot read track data");
 				}
-
-				addTrackToDatabase(Paths.get(file.toURI()), trackNumber, artist, title, album, mp3File.getLengthInMilliseconds(), genre);
 			} catch (UnsupportedTagException | InvalidDataException | IOException e) {
 				e.printStackTrace();
+			}
+			
+			if(!trackRead) {
+				int i = file.getName().lastIndexOf('.');
+				String fileExtension = file.getName().substring(i+1);
+				if(fileExtension.equals("mp3")) 
+					unreadFiles.add(file);
 			}
 		}
 

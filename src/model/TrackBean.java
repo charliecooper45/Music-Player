@@ -25,7 +25,11 @@ public class TrackBean implements Serializable{
 	
 	public TrackBean(URI location, String trackNumber, String artist, String title, AlbumBean album, Duration duration, String genre) {
 		this.location = location;
+		try {
 		this.trackNumber = Integer.parseInt(trackNumber);
+		} catch(NumberFormatException e) {
+			this.trackNumber = 0;
+		}
 		this.artist = artist;
 		this.title = title;
 		this.album = album;

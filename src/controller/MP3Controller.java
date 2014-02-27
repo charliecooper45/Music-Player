@@ -101,6 +101,9 @@ public class MP3Controller implements Observer {
 				if(list.get(0).getClass().equals(TrackBean.class)) {
 					// If the list is full of tracks then we need to update the playlist
 					view.setDisplayedPlaylist(model.getPlaylist());
+				} else if (list.get(0).getClass().equals(File.class)) {
+					// Display an error message to the user
+					view.displayErrorMessage("Unable to add " + list.size() + " files.");
 				} else {
 					// Update the displayed artists
 					view.updateArtists(model.getArtists());
