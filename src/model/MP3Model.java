@@ -62,7 +62,6 @@ public class MP3Model extends Observable {
 	private Future<?> future;
 
 	public MP3Model() {
-		executor = Executors.newSingleThreadExecutor();
 		artists = new ArrayList<>();
 		playlist = new LinkedList<>();
 		artists.add(new AllArtistsBean());
@@ -423,7 +422,8 @@ public class MP3Model extends Observable {
 		}
 
 		// Shutdow the executor
-		executor.shutdownNow();
+		if(executor != null) 
+			executor.shutdownNow();
 		return true;
 	}
 
@@ -589,11 +589,12 @@ public class MP3Model extends Observable {
 	}
 
 	public void startProcessFilesThread(final File... files) {
+		executor = Executors.newSingleThreadExecutor();
 		future = executor.submit(new ProcessFilesThread(files));
 	}
 
 	public void stopProcessFilesThread() {
-		future.cancel(true);
+		executor.shutdownNow();
 	}
 
 	/**
@@ -625,8 +626,6 @@ public class MP3Model extends Observable {
 		}
 	};
 
-	//TODO NEXT: When running on desktop music is not getting saved
-	//TODO NEXT: Thread appears to still run after cancel is pressed
 	//TODO NEXT: possible log file for unread files?
 	private class ProcessFilesThread extends Thread {
 		private File[] files;
