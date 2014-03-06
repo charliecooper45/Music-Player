@@ -102,7 +102,7 @@ public class MP3Controller implements Observer {
 					view.setDisplayedPlaylist(model.getPlaylist());
 				} else if (list.get(0).getClass().equals(File.class)) {
 					// Display an error message to the user
-					view.displayErrorMessage("Unable to add " + list.size() + " files.");
+					view.displayErrorMessage("Unable to add " + list.size() + " files. Please check the log.");
 				} else {
 					// Update the displayed artists
 					view.updateArtists(model.getArtists());

@@ -12,12 +12,17 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Observable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.logging.FileHandler;
+import java.util.logging.Formatter;
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
 import java.util.prefs.Preferences;
 
 import javafx.beans.property.ReadOnlyProperty;
@@ -32,8 +37,8 @@ import com.mpatric.mp3agic.UnsupportedTagException;
 
 public class MP3Model extends Observable {
 	// Holds the location of the saved database
-	private final static Path SAVED_DATABASE_FOLDER = Paths.get(System.getProperty("user.dir") + "/MediaPlayerData");
-	private final static Path SAVED_DATABASE_FILE = Paths.get(SAVED_DATABASE_FOLDER + "/data.dt");
+	private final static Path DATA_FOLDER = Paths.get(System.getProperty("user.dir") + "/MediaPlayerData");
+	private final static Path SAVED_DATABASE_FILE = Paths.get(DATA_FOLDER + "/data.dt");
 	// Holds the preferences information
 	private Preferences prefs = Preferences.userRoot().node(this.getClass().getName());
 	// Holds the class that manages the Lastfm functionality
@@ -60,8 +65,36 @@ public class MP3Model extends Observable {
 	private ExecutorService executor;
 	// Future that is used to manipulate the current ProcessFilesThread
 	private Future<?> future;
+	// Logger object for logging files that cannot be added to the database
+	private final static Logger LOGGER = Logger.getLogger(MP3Model.class.getName());
 
 	public MP3Model() {
+		// configure the Logger
+		try {
+			FileHandler handler = new FileHandler(DATA_FOLDER + "/MyLogFile.log");
+			handler.setFormatter(new Formatter() {
+				@Override
+				public String format(LogRecord record) {
+					StringBuilder sb = new StringBuilder();
+					Date date = new Date(record.getMillis());
+					sb.append(date.toString());
+					sb.append(" ");
+					sb.append(record.getLevel().getName());
+					sb.append(" ");
+					sb.append("File \"");
+					sb.append(formatMessage(record));
+					sb.append("\" not added to CMediaPlayer");
+					sb.append("\n");
+
+					return sb.toString();
+				}
+			}); 
+			LOGGER.addHandler(handler);
+			LOGGER.setUseParentHandlers(false);
+		} catch (SecurityException | IOException e) {
+			e.printStackTrace();
+		}  
+		
 		artists = new ArrayList<>();
 		playlist = new LinkedList<>();
 		artists.add(new AllArtistsBean());
@@ -428,9 +461,9 @@ public class MP3Model extends Observable {
 	}
 
 	private void saveDatabase() throws IOException {
-		if (!Files.exists(SAVED_DATABASE_FOLDER)) {
+		if (!Files.exists(DATA_FOLDER)) {
 			// There is no previously saved data so create the folder
-			Files.createDirectory(SAVED_DATABASE_FOLDER);
+			Files.createDirectory(DATA_FOLDER);
 		}
 
 		ObjectOutputStream os = new ObjectOutputStream(Files.newOutputStream(SAVED_DATABASE_FILE));
@@ -702,8 +735,10 @@ public class MP3Model extends Observable {
 			if(!trackRead) {
 				int i = file.getName().lastIndexOf('.');
 				String fileExtension = file.getName().substring(i+1);
-				if(fileExtension.equals("mp3")) 
+				if(fileExtension.equals("mp3")) {
+					LOGGER.warning(file.getName());
 					unreadFiles.add(file);
+				}
 			}
 		}
 
